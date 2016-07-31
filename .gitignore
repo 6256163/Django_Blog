@@ -1,0 +1,13 @@
+*.DS_Store
+bin/
+lib/
+include/
+Include/
+Scripts/
+Lib/
+*.pyc
+*.log
+.idea/
+.Python
+pip-selfcheck.json
+db.sqlite3

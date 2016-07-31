@@ -1,0 +1,8 @@
+
+{% if permission %}
+    {% for p in permission %}
+        <li>{{ p }}</li>
+    {% endfor %}
+{% else %}
+    {{ "No permission" }}
+{% endif %}
