@@ -37,25 +37,14 @@
 </head>
 <body>
 
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{% url 'blog:index' %}">Django Blog</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <div class="nav navbar-nav navbar-right">
-                {% include 'users/base/user_lable.html' %}
-            </div>
-        </div>
-    </div>
-</nav>
+ {% include 'users/base/user_lable.html' %}
 <br/>
 <br/>
 <br/>
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    <li{% if message.tag %} class="{{ message.tag }}"{% endif %}>{{ message }}</li>
+    <li>{% if message.tag %} class="{{ message.tag }}"{% endif %}>{{ message }}</li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -67,26 +56,34 @@
             <th>标题</th>
             <th>作者</th>
             <th>发布时间</th>
+            <th>最后回复</th>
+            <th>回复</th>
             <th colspan="3">操作</th>
         </tr>
         </thead>
-        {% if latest_blog_list %}
+        {% if latest_list %}
             <tbody>
-            {% for blog in latest_blog_list %}
+            {% for b in latest_list %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ blog.blog_title }}</td>
-                    <td>{{ blog.user.username }}</td>
-                    <td>{{ blog.pub_date }}</td>
-                    <td><a href="{% url 'blog:detail' blog.id %}">Show</a></td>
+                    <td>{{ b.0.blog_title }}</td>
+                    <td>{{ b.0.user.username }}</td>
+                    <td>{{ b.0.pub_date }}</td>
+                    {% if b.1.pub_date %}
+                    <td>{{ b.1.pub_date }}</td>
+                    {% else %}
+                    <td>/</td>
+                    {% endif %}
+                    <td>{{ b.2 }}</td>
+                    <td><a href="{% url 'blog:detail' b.0.id %}">Show</a></td>
                     <td>
-                        <a href="{% url 'blog:edit' blog.id %}">
-                            {% if blog.user.username == user.username %}
+                        <a href="{% url 'blog:edit' b.0.id %}">
+                            {% if b.0.user.username == user.username %}
                                 Edit
                             {% endif %}
                         </a>
                     </td>
-                    <td><a href="{% url 'blog:delete' blog.id %}">Delete</a></td>
+                    <td><a href="{% url 'blog:delete' b.0.id %}">Delete</a></td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -98,7 +95,9 @@
 
 {% if user.is_authenticated %}
     <P>Create a new blog</P>
-
+    {% if error %}
+        <p><strong>{{ error }}</strong></p>
+    {% endif %}
     <form role="form" action="" method="post">
         {% csrf_token %}
         {{ form.as_p }}

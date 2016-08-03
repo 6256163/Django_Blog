@@ -1,8 +1,20 @@
-<!DOCTYPE html>
-<div class="" align="right">
+
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'blog:index' %}">Django Blog</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <div class="nav navbar-nav navbar-right">
+                <div class="" align="right">
 {% if user.is_authenticated %}
     Welcome, <a href="{% url 'users:user_info' %}">{{ user.username }}</a>. Thanks for logging in!&nbsp;<a href="{% url 'users:logout' %}">logout&nbsp;</a></p>
 {% else %}
     Welcome, new user. Please <a href="{% url 'users:login' %}">log in</a>.&nbsp;&nbsp;&nbsp;<a href="{% url 'users:register' %}">没有账户？</a>
 {% endif %}
 </div>
+            </div>
+        </div>
+    </div>
+</nav>

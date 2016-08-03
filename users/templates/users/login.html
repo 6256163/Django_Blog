@@ -37,31 +37,22 @@
 </head>
 <body>
 
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{% url 'blog:index' %}">Django Blog</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <div class="nav navbar-nav navbar-right">
-                {% include 'users/base/user_lable.html' %}
-            </div>
-        </div>
-    </div>
-</nav>
+ {% include 'users/base/user_lable.html' %}
 <br/>
 <br/>
 <br/>
 
 <div class="container">
-    {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
+    {% if error %}
+        <p><strong>{{ error }}</strong></p>
     {% endif %}
-    <form action="" method="post" class="form-signin" _lpchecked="1">
+    <form action="{% url 'users:login' %}" method="post" class="form-signin" _lpchecked="1">
         <h2 class="form-signin-heading">Please sign in</h2>
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="登录"/>
+        <br/>
+        <a href="{% url 'users:register' %}">用户注册</a>
     </form>
 
 </div>

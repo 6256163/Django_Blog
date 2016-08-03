@@ -9,3 +9,7 @@ class BlogForm(forms.ModelForm):
     class Meta:
         model = Blog
         fields = ['blog_title', 'blog_text',]
+
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
