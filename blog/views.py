@@ -37,8 +37,6 @@ def index(request):
                                    'error': "No permission to add blog."})
         else:
             form = forms.BlogForm()
-            for a in data:
-                print (a[0].blog_title)
             return render(request, 'blog/index.html',
                           {'latest_list': data, 'form': form, 'user': request.user})
     else:

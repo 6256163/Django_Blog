@@ -67,7 +67,7 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ b.0.blog_title }}</td>
-                    <td>{{ b.0.user.username }}</td>
+                    <td><a href="{% url 'users:user_info' b.0.user.id %}">{{ b.0.user.username }}</a></td>
                     <td>{{ b.0.pub_date }}</td>
                     {% if b.1.pub_date %}
                     <td>{{ b.1.pub_date }}</td>

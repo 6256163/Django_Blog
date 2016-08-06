@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import auth
 from . import forms
 from django import http
+from .models import Relationship
 
 
 # Create your views here.
@@ -70,7 +71,7 @@ def show_permission(request):
     return render(request, 'users/permission.html', {'permission': permission, 'user': request.user})
 
 
-def user_info(request):
+def my_info(request):
     """
     Gte user info: username, email, first_name, last_name, permission.
     :param request:
@@ -79,5 +80,50 @@ def user_info(request):
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
     else:
-        permission = request.user.user_permissions.all()
-        return render(request, 'users/user_info.html', {'user': request.user, "permission": permission})
+        return render(request, 'users/my_info.html', {'user': request.user,
+                                                      "permission": request.user.user_permissions.all(),
+                                                      'followers': find_all_followers(request),
+                                                      })
+
+
+def user_info(request, user_id):
+    if not request.user.is_authenticated():
+        return http.HttpResponseRedirect('users/login')
+    else:
+        user = get_object_or_404(User, pk=user_id)
+        try:
+            Relationship.objects.get(current_user = request.user, follower = user)
+        except Relationship.DoesNotExist:
+            return render(request, 'users/user_info.html', {'user': user,
+                                                            "permission": user.user_permissions.all(),
+                                                            'relation': False})
+        else:
+            return render(request, 'users/user_info.html', {'user': user,
+                                                            "permission": user.user_permissions.all(),
+                                                            'relation': True})
+
+
+def follow(request, user_id):
+    if not request.user.is_authenticated():
+        return http.HttpResponseRedirect('users/login')
+    else:
+        r = Relationship(current_user= request.user, follower= User.objects.get(pk=user_id))
+        r.save()
+        return user_info(request, user_id)
+
+
+def unfollow(request, user_id):
+    if not request.user.is_authenticated():
+        return http.HttpResponseRedirect('users/login')
+    else:
+        Relationship.objects.filter(current_user=request.user, follower=User.objects.get(pk=user_id)).delete()
+        return user_info(request, user_id)
+
+
+def find_all_followers(request):
+    if not request.user.is_authenticated():
+        return http.HttpResponseRedirect('users/login')
+    else:
+        followers = Relationship.objects.filter(current_user=request.user)
+        return followers
+

@@ -11,3 +11,4 @@ Lib/
 .Python
 pip-selfcheck.json
 db.sqlite3
+tcl/

@@ -48,43 +48,49 @@
         <tr>
             <th>类别</th>
             <th>详细</th>
-            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr>
             <td>用户名</td>
             <td>{{ user.username }}</td>
-            <td>
-
-            {% if relation %}
-                <a href="{% url 'users:unfollow' user.id %}"><button type="button">Unfollow</button></a>
-            {% else %}
-                <a href="{% url 'users:follow' user.id %}"><button type="button">Follow</button></a>
-            {% endif %}
-
-            </td>
         </tr>
         <tr>
             <td>邮箱</td>
             <td>{{ user.email }}</td>
-            <td></td>
         </tr>
         <tr>
             <td>姓</td>
             <td>{{ user.last_name }}</td>
-            <td></td>
         </tr>
         <tr>
             <td>名</td>
             <td>{{ user.first_name }}</td>
-            <td></td>
         </tr>
         <tr>
             <td>权限组</td>
             <td><a href="{% url 'users:show_permission' %}">{{ user.groups.all }}</a></td>
-            <td></td>
         </tr>
+
+        {% if not followers %}
+        <tr>
+            <td>
+                我的好友
+            </td>
+            <td>无</td>
+        </tr>
+        {% else %}
+        {% for f in followers %}
+        <tr>
+            <td>
+                {% if forloop.counter == 1 %}
+                我的好友
+                {% endif %}
+            </td>
+            <td><a href="{% url 'users:user_info' f.follower.id %}">{{ f.follower }}</a></td>
+        </tr>
+        {% endfor %}
+        {% endif %}
         </tbody>
 
     </table>
