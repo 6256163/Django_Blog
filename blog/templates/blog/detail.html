@@ -52,7 +52,7 @@
 <br/>
 {% for reply in blog.reply_set.all %}
     <li>{{ reply.reply_text }}</li>
-    <p>reply by <a href="{% url 'users:user_info' %}">{{ reply.user.username }}</a></p>
+    <p>reply by <a href="{% url 'users:my_info' %}">{{ reply.user.username }}</a></p>
 {% endfor %}
 
 <form action="{% url 'blog:reply' blog.id %}" method="post">

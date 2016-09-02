@@ -1,12 +1,24 @@
+# coding=utf-8
+from __future__ import unicode_literals
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import auth
 from . import forms
 from django import http
-from .models import Relationship
-
+from .models import Relationship, Notice
+from rest_framework import viewsets
+from users.serializers import UserSerializer
 
 # Create your views here.
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    允许查看和编辑user 的 API endpoint
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 
 def register(request):
     """
@@ -80,7 +92,9 @@ def my_info(request):
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
     else:
+        n = news_count(request)
         return render(request, 'users/my_info.html', {'user': request.user,
+                                                      'news':len(n),
                                                       "permission": request.user.user_permissions.all(),
                                                       'followers': find_all_followers(request),
                                                       })
@@ -107,9 +121,13 @@ def follow(request, user_id):
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
     else:
-        r = Relationship(current_user= request.user, follower= User.objects.get(pk=user_id))
-        r.save()
-        return user_info(request, user_id)
+        try:
+            r = Relationship(current_user= request.user, follower= User.objects.get(pk=user_id))
+            r.save()
+        except Exception,e:
+            return user_info(request, user_id)
+        else:
+            return user_info(request, user_id)
 
 
 def unfollow(request, user_id):
@@ -119,7 +137,6 @@ def unfollow(request, user_id):
         Relationship.objects.filter(current_user=request.user, follower=User.objects.get(pk=user_id)).delete()
         return user_info(request, user_id)
 
-
 def find_all_followers(request):
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
@@ -127,3 +144,18 @@ def find_all_followers(request):
         followers = Relationship.objects.filter(current_user=request.user)
         return followers
 
+
+def news_count(request):
+    if not request.user.is_authenticated():
+        return http.HttpResponseRedirect('users/login')
+    else:
+        notices = Notice.objects.filter(to_user = request.user, flag=1)
+        return notices
+
+
+def news(request):
+    n = news_count(request)
+    for f in n:
+        f.flag=0
+        f.save()
+    return render(request, 'users/news.html', {'news': n,})

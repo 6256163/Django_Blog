@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Register</title>
+    <title>User Info</title>
 
     <!-- Bootstrap core CSS -->
     <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
@@ -37,30 +37,41 @@
 </head>
 <body>
 
-{% include 'users/base/user_lable.html' %}
+ {% include 'users/base/user_lable.html' %}
 <br/>
 <br/>
 <br/>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li>{% if message.tag %} class="{{ message.tag }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 
-<div class="container">
-    {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
-    {% endif %}
-    <form action="" method="post" class="form-signin" _lpchecked="1">
-        <h2 class="form-signin-heading">Please register</h2>
-        {% csrf_token %}
-        <table>
-            {% for field in form %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>来自</th>
+            <th>内容</th>
+            <th>时间</th>
+        </tr>
+        </thead>
+            <tbody>
+            {% for n in news %}
                 <tr>
-                    <td>{{ field.label_tag }}</td>
-                    <td>{{ field }}</td>
-                    <td>{{ field.errors }}</td>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'users:user_info' n.from_user.id %}">{{ n.from_user }}</a></td>
+                    <td>{{ n.message }}</td>
+                    <td>{{ n.pub_date }}</td>
                 </tr>
             {% endfor %}
-        </table>
-        <input type="submit" value="注册"/>
-    </form>
-
+            </tbody>
+    </table>
 </div>
+
+
 </body>
 </html>

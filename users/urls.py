@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^(?P<user_id>[0-9]+)/user_info/$', views.user_info, name='user_info'),
     url(r'^(?P<user_id>[0-9]+)/follow/$', views.follow, name='follow'),
     url(r'^(?P<user_id>[0-9]+)/unfollow/$', views.unfollow, name='unfollow'),
+    url(r'^news/$', views.news, name='news'),
 ]
