@@ -12,3 +12,4 @@ Lib/
 pip-selfcheck.json
 db.sqlite3
 tcl/
+Thumbs.db
