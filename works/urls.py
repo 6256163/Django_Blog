@@ -15,19 +15,14 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from rest_framework import routers
-from blog import views
-from users import views
-
-
-router = routers.DefaultRouter()
-router.register(r'user', views.UserViewSet)
+from works import settings
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^blog/', include('blog.urls', namespace="blog")),
-    url(r'^users/', include('users.urls', namespace="users")),
-    url(r'^', include('blog.urls', namespace="blog")),
-    url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    ]
+    url(r'^', include('blog.urls')),
+    url(r'^user/', include('users.urls')),
+    url(r'^media_process/', include('media.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+
+]

@@ -1,14 +1,16 @@
-from django.conf.urls import url
+from blog.views import ReplyViewSet
+from django.conf.urls import url, include
 from blog import views
-from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.routers import DefaultRouter
+
+
+# Create a router and register our viewsets with it.
+router = DefaultRouter()
+router.register(r'blog', views.BlogViewSet)
+router.register(r'replies', views.ReplyViewSet)
+router.register(r'reply_in_reply', views.ReplyInReplyViewSet)
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
-    url(r'^(?P<blog_id>[0-9]+)/$', views.detail, name='detail'),
-    url(r'^(?P<blog_id>[0-9]+)/edit/$', views.edit, name='edit'),
-    url(r'^(?P<blog_id>[0-9]+)/reply/$', views.reply_blog, name='reply'),
-    url(r'^(?P<blog_id>[0-9]+)/delete/$', views.delete, name='delete'),
-    url(r'^blogs/$', views.BlogList.as_view(), name= 'BlogList'),
-    url(r'^blogs/(?P<blog_id>[0-9]+)/$', views.BlogDetail.as_view(), name = 'BlogDetail'),
+    url(r'^', include(router.urls)),
+    url(r'^$', views.api_root),
 ]
-urlpatterns = format_suffix_patterns(urlpatterns)

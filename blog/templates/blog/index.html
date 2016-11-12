@@ -1,109 +1,319 @@
 {% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en">
+{% load blog_extras %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src={% static "blog/js/blog.js" %}></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script>
+        function onmouseover_blog(dom) {
+            //鼠标悬停帖子，栏位变色
+            dom.style.background = "#f9f9ff";
+        }
+        ;
 
-    <title>Blog index</title>
+        function onmouseout_blog(dom) {
+            //栏位变色还原
+            dom.style.background = "#FFF";
+        }
 
-    <!-- Bootstrap core CSS -->
-    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+        function changeheight(id, height) {
+            $(id).height(height);
+        }
+        function changewidth(id, width) {
+            $(id).width(width);
+        }
 
-    <!-- Custom styles for this template -->
-    <link href="dashboard.css" rel="stylesheet">
 
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+        //悬停 - 侧边栏状态图标更改
+        $(document).ready(function () {
+            $("ul.float li a").mouseover(function () {
+                var t = this.style;
+                t.backgroundPositionY = parseInt(t.backgroundPositionY) - 55 + "px";
+            }).mouseout(function () {
+                var t = this.style;
+                t.backgroundPositionY = parseInt(t.backgroundPositionY) + 55 + "px";
+            });
+        });
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <!--
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.js.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.js.css' %}">
-    <title>blog</title>
-    -->
+
+        //提交新帖
+        $(document).ready(function () {
+            //POST请求 获取CSRF_Token
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            var csrftoken = getCookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            $("button#post_blog").click(function () {
+                var blogtext= "";
+                for (var i=0; i<$("#blog_text").contents().length;i++){
+                    if ($("#blog_text").contents()[i].nodeName == "IMG"){
+                        blogtext+=$("#blog_text").contents()[i].outerHTML;
+                    }
+                    if ($("#blog_text").contents()[i].nodeName == "#text"){
+                        blogtext+=$("#blog_text").contents()[i].data+"\n";
+                    }
+                    if ($("#blog_text").contents()[i].nodeName == "DIV"){
+                        blogtext+=$("#blog_text").contents()[i].innerText+(($("#blog_text").contents()[i].innerText == "\n") ? "" : "\n");
+                    }
+
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "",
+                    data: JSON.stringify({
+                        "blog_title": $("#blog_title").val(),
+                        "blog_text": blogtext
+                    }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (msg) {
+                        location.href = msg.blog.id;
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            var url = window.location.href.split("?");
+            for (var i = 1; i <= $(".page").length; i++) {
+                if (i == 1) {
+                    $(".page a")[i - 1].href = url[0];
+                }
+                else {
+                    $(".page a")[i - 1].href = url[0] + "?page=" + i;
+                }
+                if ($(".page a")[i - 1].href == window.location.href) {
+                    $(".page a")[i - 1].removeAttribute("href");
+                }
+            }
+
+            $("li#to_page_top a").click(function () {
+                $('html, body').animate({scrollTop: $('body').offset().top}, 200)
+            })
+
+            $("li#refresh_page a").click(function () {
+                window.location.reload()
+                $(window).scrollTop(0)
+            })
+
+            $("li#post_blog a").click(function () {
+                $('html, body').animate({
+                    scrollTop: $("#div_post_blog").offset().top - $("#nav_in").height()
+                }, 500);
+                $("#blog_title").focus();
+            })
+
+            $("#a_insert_img").click(function () {
+                $("#ifm_image")[0].src = "/media_process/fileUpload/"
+                $("#ifm_image").eq(0).show().css("top", "100px");//.css("left", document.body.clientWidth / 2 - $("#ifm_image").width() / 2 + "px");
+                $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
+            })
+        });
+
+
+    </script>
+
+    <title>Index</title>
 </head>
-<body>
 
- {% include 'users/base/user_lable.html' %}
-<br/>
-<br/>
-<br/>
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li>{% if message.tag %} class="{{ message.tag }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>标题</th>
-            <th>作者</th>
-            <th>发布时间</th>
-            <th>最后回复</th>
-            <th>回复</th>
-            <th colspan="3">操作</th>
-        </tr>
-        </thead>
-        {% if latest_list %}
-            <tbody>
-            {% for b in latest_list %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ b.0.blog_title }}</td>
-                    <td><a href="{% url 'users:user_info' b.0.user.id %}">{{ b.0.user.username }}</a></td>
-                    <td>{{ b.0.pub_date }}</td>
-                    {% if b.1.pub_date %}
-                    <td>{{ b.1.pub_date }}</td>
-                    {% else %}
-                    <td>/</td>
-                    {% endif %}
-                    <td>{{ b.2 }}</td>
-                    <td><a href="{% url 'blog:detail' b.0.id %}">Show</a></td>
-                    <td>
-                        <a href="{% url 'blog:edit' b.0.id %}">
-                            {% if b.0.user.username == user.username %}
-                                Edit
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td><a href="{% url 'blog:delete' b.0.id %}">Delete</a></td>
-                </tr>
+<body style="background-color:#e4eaff">
+<iframe id="ifm_image" src="" scrolling="no"
+        style="position: fixed; border: none;margin: auto; left:0; right: 0 ;z-index: 1000;display: none"></iframe>
+{% include 'blog/navigation.html' %}
+<div style="position:fixed;left:50%; top: 100px;margin-left:400px;z-index: 998;">
+
+    <ul class="float" style="padding:10px;">
+
+        <li id="to_page_top" style="list-style:none"><a
+                style="background:url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        </li>
+        <li id="refresh_page" style="list-style:none"><a
+                style="background:0 -55px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        </li>
+        <li id="post_blog" style="list-style:none"><a
+                style=" background:0 -165px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        </li>
+        <li style="list-style:none"><a
+                style="background:0 -275px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px; "></a>
+        </li>
+    </ul>
+</div>
+<div id="blog_list_outer"
+     style="width:800px;margin:0 auto; border-left:1px solid black; border-right: 1px solid black; background-color: #ffffff">
+    <ul style="margin:0; padding:0;">
+        {% for b in blog.results %}
+            <li onmouseover="onmouseover_blog(this)" onmouseout="onmouseout_blog(this)"
+                style="list-style-type:none; border-top:1px solid black">
+                <div style="overflow:hidden;">
+                    <div style="float:left;width:8%;margin-left: 20px;margin-top: 10px;">
+                        <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover; width:50px; height:30px;font-size:12px; display:block; text-align:center">{{ b.reply_counter }}</span>
+                    </div>
+                    <div style="float:left;width:88%;margin-right:5px;margin-top:5px;overflow:hidden;margin-bottom: 5px;">
+                        <div style="overflow:hidden;margin-top: 5px;">
+                            <div style="float:left; width:70%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden">
+                                <a href="{{ b.url }}" title="{{ b.blog_title }}"
+                                   style="text-decoration:none">{{ b.blog_title }}</a>
+
+                            </div>
+
+                            <div style="float:left;width:14%;margin-right: 10px;">
+                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
+                                    {{ b.user }}</p>
+                            </div>
+
+                            <div style="float:right; width:10%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden">
+                                <p></p>
+                            </div>
+
+                        </div>
+
+
+                        <div style="overflow:hidden;margin-top: 10px;margin-bottom: 10px;">
+
+                            <div style="float:left; width:70%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden; font-size:12px">
+                                <div style="width: 95%">
+                                    <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">{{ b.blog_text }}</p>
+                                </div>
+                            </div>
+
+                            <div style="float:left;width:14%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-right: 10px;">
+                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
+                                    {% if  b.latest_reply %}
+                                        {{ b.latest_reply.user }}
+                                    {% else %}
+                                        {{ b.user }}
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div style="float:right; width:10%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden; font-size:12px">
+                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
+                                    {% if  b.latest_reply %}
+                                        {{ b.latest_reply.pub_date|slice:"5:10" }}
+                                        {{ b.latest_reply.pub_date|slice:"11:16" }}
+                                    {% else %}
+                                        {{ b.pub_date|slice:"5:10" }} {{ b.pub_date|slice:"11:16" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    <div style="overflow:hidden; padding-left: 10px; padding-top: 10px; margin-bottom: 10px; border-top: solid 1px #000000">
+        <div style="float: left; margin-right: 5px">
+            {% if blog.previous == None %}
+                <a></a>
+            {% else %}
+                <a href=" {{ blog.previous }} ">上一页</a>
+            {% endif %}
+        </div>
+
+        {% if blog.count|divide:10 > 1 %}
+            {% for i in blog.count|divide:10|list %}
+                <div class="page" style="float: left; margin-right: 5px"><a>{{ i }}</a></div>
             {% endfor %}
-            </tbody>
-        {% else %}
-            <div>No blog display</div>
         {% endif %}
-    </table>
+        <div style="float: left; margin-right: 5px">
+            {% if blog.next == None %}
+                <a></a>
+            {% else %}
+                <a href="{{ blog.next }}">下一页</a>
+            {% endif %}
+
+        </div>
+    </div>
+    <div id="div_post_blog"
+         style="padding-left: 10px; background-color:#f7f7f7; border-top:1px solid black; border-bottom:1px solid black">
+
+        <div style="margin: 10px">
+            <a><strong>发表新贴</strong></a>
+            <a>发起投票</a>
+        </div>
+
+        <div style="margin: 10px; overflow: hidden">
+            <input id="blog_title" type="text" placeholder="请填写标题" name="blog_title" style="width: 80%"/>
+        </div>
+
+        <div>
+            <div style="margin: 10px">
+                <div style="width: 90%; border:1px solid black">
+                    <div style="margin: 5px; padding-left: 5px">
+                        <a id="a_insert_img">图片</a>
+                        <a>视频</a>
+                        <a>音乐</a>
+                        <a>表情</a>
+                        <a>附件</a>
+                    </div>
+
+                    <div>
+                        <div>
+                            <div id="blog_text" name="blog_text" style="height: 220px;overflow-y: auto;overflow-x: hidden ;z-index: 0; border: solid 1px #999999;
+                                background-color: #ffffff; margin: 10px"
+                                 contenteditable="true">
+                            </div>
+
+                            <div style="display: none;">
+                                <div>想用@提到谁？</div>
+                                <ul></ul>
+                            </div>
+                            <div style="display: none;">
+                                <div>添加什么话题?</div>
+                                <ul></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+
+        <div>
+            <button id="post_blog" title="Ctrl+Enter快捷发表">
+                发 表
+            </button>
+        </div>
+        <br/>
+    </div>
+
 </div>
 
-{% if user.is_authenticated %}
-    <P>Create a new blog</P>
-    {% if error %}
-        <p><strong>{{ error }}</strong></p>
-    {% endif %}
-    <form role="form" action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Submit"/>
-    </form>
 
-{% endif %}
 </body>
 </html>

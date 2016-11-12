@@ -1,0 +1,90 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script type="text/javascript">window.__admin_media_prefix__ = "/static/admin/";</script>
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css"/>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script type="text/javascript" src="/static/admin/js/core.js"></script>
+    {{ form.media }}
+    <script src="{% static "users/js/jsAddress.js" %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            addressInit('id_hometown_province', 'id_hometown_city', 'id_hometown_area');
+
+            parent.changeheight(id = "#iframe_user_info", height = $("body").height() + 100)
+
+        })
+
+
+    </script>
+    <style>
+        th {
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        ul {
+            overflow: hidden;
+            padding: 8px 0 8px 0;
+            margin: 0;
+        }
+
+        ul li {
+            list-style-type: none;
+            float: left;
+            margin: 0 10px 0 0;
+            text-align: left;
+
+        }
+
+
+    </style>
+</head>
+<body>
+<div style="margin-left: 50px; ">
+    <h2 style="margin-bottom: 10px">头像设置</h2>
+</div>
+<div style="border-bottom: 1px black solid;margin: 0 50px 0 50px"></div>
+<form action="/user/headimg_setting/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+
+    <table style="margin: 10px 0 0 50px; border-collapse:   separate;   border-spacing:   10px;">
+        <tbody>
+        <tr>
+            <th>
+                {{ form.head_img.label }}
+            </th>
+            <td>
+                {{ form.head_img }}
+                {% if error %}
+                {{ error }}
+                {% endif %}
+            </td>
+        </tr>
+
+
+
+
+        <tr>
+            <th>
+            </th>
+            <td>
+                <div style="overflow:hidden;">
+                    <input type="submit" value="提交"
+                           style="width: 310px;background-color: #21b7ff; color: white;font-weight: 700;font-size: 16px ;border: none;"/>
+                </div>
+            </td>
+        </tr>
+
+
+        </tbody>
+    </table>
+</form>
+</body>
+</html>

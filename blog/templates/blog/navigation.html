@@ -1,0 +1,101 @@
+{% load staticfiles %}
+<script>
+
+    function mouseover_to_show_list(dom) {
+        //显示导航栏下拉列表
+        dom.getElementsByTagName("ul")[0].style.display = "block";
+    }
+
+    function mouseover_to_hide_list(dom) {
+        //隐藏导航栏下拉列表
+        dom.getElementsByTagName("ul")[0].style.display = "none"
+    }
+
+    window.onload = function () {
+        //固定导航栏的高度
+        $("#nva")[0].style.height = $("#nav_in").height() + "px";
+    }
+
+    $(document).ready(function () {
+        $("#text_login").click(function () {
+            $("#login").eq(0).show().css("top", "100px").css("left", document.body.clientWidth / 2 - $("#login").width() / 2 + "px");
+            $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
+        })
+        $("#text_register").click(function () {
+            $("#register").eq(0).show().css("top", "100px").css("left", document.body.clientWidth / 2 - $("#register").width() / 2 + "px");
+            $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
+            $("#register_form")[0].action = "/user/register/?next=" + window.location.pathname
+        })
+
+    });
+
+</script>
+<!--
+<iframe id="iframe_login" src="" frameborder="0"
+        style="position: fixed; padding: 0px; width: 100%; height: 100%; display: none;z-index: 1000"></iframe>
+-->
+
+{% include 'users/login.html' %}
+{% include 'users/register.html' %}
+
+<div id="shadow"
+     style="width: 3000px; height: 3000px; position: fixed; background: black; z-index: -1; opacity: 0"></div>
+<div id="nva" style="top: 0">
+    <div style="position: fixed; width: 100%; top:0;left: 0;z-index: 999">
+        <div style="position:absolute; right:10px">
+
+            <li style="list-style-type:none; float:left;position: relative; ">
+                {% if user.is_authenticated %}
+                    <div onmouseover="mouseover_to_show_list(this)" onmouseout="mouseover_to_hide_list(this)"
+                         style="overflow: hidden; z-index: 1; margin-right: 5px">
+                    <p style="margin-bottom: 0"><a href="/user/my_info/" style="text-decoration: none">{{ user }}</a>
+                    </p>
+
+                {% else %}
+                    <div style="overflow: hidden; z-index: 1; margin-right: 5px">
+                    <p id="text_login" style="margin-bottom: 0; float: left;">登录</p>
+                    <p style="margin-bottom: 0; float: left;">/</p>
+                    <p id="text_register" style="margin-bottom: 0; float: left;">注册</p>
+
+
+                {% endif %}
+                <ul style="margin:0;padding:0; display:none;position: absolute;right: 0;border: solid 1px #000000; background-color: #ffffff;box-shadow: 1px 1px 2px #ccc">
+                    <li style="list-style-type:none;">
+                        <a style="white-space: nowrap; line-height: 1.5em;color: #333;display: block;border-top: 1px dotted #ccc;padding: 0 1em;">我的帖子</a>
+                    </li>
+                    <li style="list-style-type:none;">
+                        <a style="white-space: nowrap; line-height: 1.5em;color: #333;display: block;border-top: 1px dotted #ccc;padding: 0 1em;">我的收藏</a>
+                    </li>
+                </ul>
+                </div>
+            </li>
+
+
+            {% if user.is_authenticated %}
+                <li style="list-style-type:none; float:left;position: relative;">
+                    <div onmouseover="mouseover_to_show_list(this)" onmouseout="mouseover_to_hide_list(this)"
+                         style="overflow: hidden; z-index: 1;">
+                        <p style="margin-bottom: 0">设置</p>
+                        <ul style="margin:0;padding:0; display:none;position: absolute;right: 0;border: solid 1px #000000; background-color: #ffffff;box-shadow: 1px 1px 2px #ccc">
+                            <li id="account_setting" style="list-style-type:none;">
+                                <a href=""
+                                   style="white-space: nowrap; line-height: 1.5em;color: #333;display: block;border-top: 1px dotted #ccc;padding: 0 1em;">帐号设置</a>
+                            </li>
+                            <li style="list-style-type:none;">
+                                <a id="logout" href="/user/logout/"
+                                   style="white-space: nowrap; line-height: 1.5em;color: #333;display: block;border-top: 1px dotted #ccc;padding: 0 1em;">退出</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            {% endif %}
+
+
+        </div>
+
+        <div id="nav_in" style=" background-color: #ffffff; clear: both;">
+            <div style="font-size:36px;">百度 Tieba</div>
+        </div>
+    </div>
+</div>
+</div>

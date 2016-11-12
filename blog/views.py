@@ -1,78 +1,118 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from django.contrib import messages
-from django.http import Http404
+from blog.permissions import IsOwnerOrReadOnly
+from django.contrib import messages,auth
 from django.shortcuts import render, get_object_or_404
 from django import http
-from django.contrib.auth.models import User
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import mixins
-from rest_framework import generics
-from blog.models import Blog
-from blog.serializers import BlogSerializer
+from blog.serializers import BlogSerializer, ReplySerializer, ReplyInReplySerializer
 from users.models import Notice, Relationship
 from . import forms
-from .models import Blog, Reply
-
-
-
-
+from users import forms as user_form
+from .models import Blog, Reply, ReplyInReply
+from rest_framework import permissions, viewsets,renderers
+from rest_framework.decorators import api_view, detail_route
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
 # Create your views here.
 
 
-class BlogList(generics.ListCreateAPIView):
+class BlogViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` and `destroy` actions.
+
+    Additionally we also provide an extra `highlight` action.
+    """
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    renderer_classes = (renderers.TemplateHTMLRenderer,renderers.JSONRenderer,)
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer_blog = self.get_serializer(instance)
+        replies_queryset = Reply.objects.filter(blog=instance)
+        page = self.paginate_queryset(replies_queryset)
+        if page is not None:
+            serializer_reply = ReplySerializer(*[page], **{"context": self.get_serializer_context(), "many": True})
+            return Response({"blog":serializer_blog.data, "replies":self.get_paginated_response(serializer_reply.data).data},template_name='blog/detail.html')
+
+        serializer_reply = ReplySerializer(replies_queryset, context=self.get_serializer_context(), many=True)
+        return Response({"blog":serializer_blog.data, "replies":serializer_reply.data},template_name='blog/detail.html')
+
+    def create(self, request, *args, **kwargs):
+        request.data['blog_title']=request.data['blog_title'].replace("\n", "")
+        #request.data['blog_text']=request.data['blog_text'].replace("\n", "<br>")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=302, headers=headers)
 
 
-class BlogDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Blog.objects.all()
-    serializer_class = BlogSerializer
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).order_by("-pub_date")
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return Response({'blog': self.get_paginated_response(serializer.data).data, 'form': user_form.RegisterForm}, template_name='blog/index.html')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'blog': serializer, 'user': request.user, 'form': user_form.RegisterForm},template_name='blog/index.html')
 
 
-def blog_list(request,format=None):
-    """
-    List all blogs, or create a new blog.
-    """
-    if request.method == 'GET':
-        blogs = Blog.objects.all()
-        serializer = BlogSerializer(blogs, many=True,context={'request': request})
-        return Response(serializer.data)
+class ReplyViewSet(viewsets.ModelViewSet):
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    renderer_classes = (renderers.TemplateHTMLRenderer, renderers.JSONRenderer)
 
-    elif request.method == 'POST':
-        serializer = BlogSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer_reply = self.get_serializer(instance)
+        replies_in_reply_queryset = ReplyInReply.objects.filter(reply=instance)
+        page = self.paginate_queryset(replies_in_reply_queryset)
+        if page is not None:
+            serializer_replies_in_reply = ReplyInReplySerializer(*[page], **{"context": self.get_serializer_context(), "many": True})
+            return Response(
+                {"reply": serializer_reply.data, "replies_in_reply": self.get_paginated_response(serializer_replies_in_reply.data).data},
+                template_name='blog/reply_in_reply.html')
+
+            serializer_replies_in_reply = ReplyInReplySerializer(replies_in_reply_queryset, context=self.get_serializer_context(), many=True)
+        return Response({"reply": serializer_reply.data, "replies_in_reply": serializer_replies_in_reply.data},
+                        template_name='blog/reply_in_reply.html')
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def blog_detail(request, blog_id):
-    """
-    Retrieve, update or delete a code snippet.
-    """
-    try:
-        blog = Blog.objects.get(pk=blog_id)
-    except Blog.DoesNotExist:
-        return http.HttpResponse(status=status.HTTP_404_NOT_FOUND)
+class ReplyInReplyViewSet(viewsets.ModelViewSet):
+    queryset = ReplyInReply.objects.all()
+    serializer_class = ReplyInReplySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
-    if request.method == 'GET':
-        serializer = BlogSerializer(blog)
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.user)
 
-    elif request.method == 'PUT':
-        serializer = BlogSerializer(blog, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = ReplyInReply.objects.all()
+        reply = self.request.GET.get('reply', None)
+        if reply is not None:
+            queryset = queryset.filter(reply=reply)
+        return queryset
 
-    elif request.method == 'DELETE':
-        blog.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'blogs': reverse('blog-list', request=request, format=format)
+    })
+
 
 
 
@@ -106,9 +146,7 @@ def index(request):
                                   {'latest_list': data, 'form': form, 'user': request.user,
                                    'error': "No permission to add blog."})
         else:
-            form = forms.BlogForm()
-            return render(request, 'blog/index.html',
-                          {'latest_list': data, 'form': form, 'user': request.user})
+            return render(request, 'blog/index.html',{'user': request.user})
     else:
         form = forms.LoginForm()
         return render(request, 'users/login.html', {'form': form})

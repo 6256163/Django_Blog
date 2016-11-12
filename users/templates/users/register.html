@@ -2,65 +2,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script>
 
-    <title>Register</title>
+        function register_verication(dom, reg) {
+            var result = true;
+            var verication_obj = "";
+            var verication_id = "";
+            if (dom[0].id == "reg_username") {
+                verication_obj = "用户名";
+                verication_id = "username";
+            }
+            else if (dom[0].id == "reg_password") {
+                verication_obj = "密码";
+                verication_id = "password";
+            }
+            else {
+                verication_obj = "邮箱";
+                verication_id = "email";
+            }
+            $("#" + verication_id + "_tips").eq(0).hide().text("");
+            if (!reg.test(dom.val())) {
+                result = false;
+                $("#" + verication_id + "_succe").eq(0).hide().text("");
+                if (verication_id == "username") {
+                    $("#" + verication_id + "_error").eq(0).show().text("× 用户名包含特殊字符或长度不符");
+                }
+                else if (verication_id == "password") {
+                    $("#" + verication_id + "_error").eq(0).show().text("× 密码包含不支持的特殊字符或长度不符");
+                }
+                else {
+                    $("#" + verication_id + "_error").eq(0).show().text("× 邮箱地址有误");
+                }
+            }
+            else {
+                if (verication_id == "username" || verication_id=="email") {
+                    $.ajax({
+                        type: "POST",
+                        url: "/user/register_verification/",
+                        data: JSON.stringify({
+                            "data": dom.val(),
+                            "type" : verication_id
+                        }),
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (msg) {
+                            if (msg.warning != "") {
+                                $("#" + verication_id + "_succe").eq(0).hide().text("");
+                                $("#" + verication_id + "_error").eq(0).show().text("× " + msg.warning);
+                                result = false
+                            }
+                            else {
+                                $("#" + verication_id + "_succe").eq(0).show().text("√");
+                                $("#" + verication_id + "_error").eq(0).hide().text("");
+                            }
+                        }
+                    });
+                }
+                else {
+                    $("#" + verication_id + "_error").eq(0).hide().text("");
+                    $("#" + verication_id + "_succe").eq(0).show().text("√");
+                }
+            }
+            return result
+        }
 
-    <!-- Bootstrap core CSS -->
-    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+        $(document).ready(function () {
 
-    <!-- Custom styles for this template -->
-    <link href="dashboard.css" rel="stylesheet">
+            $("input#reg_username").focus(function () {
+                $("#username_tips").eq(0).show().text("最长14个英文或7个汉字");
+                $("#username_succe").eq(0).hide().text("");
+                $("#username_error").eq(0).hide().text("");
+            }).blur(function () {
+                register_verication(dom = $("input#reg_username"), reg = /^[\u4e00-\u9fa5]{1,7}$|^[\dA-Za-z_]{1,14}$/);
+            });
 
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+            $("input#reg_password").focus(function () {
+                $("#password_tips").eq(0).show().text("8到16位英文，数字，特殊符号(# _ $)组成");
+                $("#password_succe").eq(0).hide().text("");
+                $("#password_error").eq(0).hide().text("");
+            }).blur(function () {
+                register_verication(dom = $("input#reg_password"), reg = /^\w{8,16}$/);
+            });
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <!--
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.js.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.js.css' %}">
-    <title>blog</title>
-    -->
+            $("input#reg_email").focus(function () {
+                $("#email_tips").eq(0).show().text("请输入正确的邮箱地址");
+                $("#email_succe").eq(0).hide().text("");
+                $("#email_error").eq(0).hide().text("");
+            }).blur(function () {
+                register_verication(dom = $("input#reg_email"), reg = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/);
+            })
+
+            $("input#reg_password_confirm").focus(function () {
+                $("#password_confirm_tips").eq(0).show().text("");
+                $("#password_confirm_succe").eq(0).hide().text("");
+                $("#password_confirm_error").eq(0).hide().text("");
+            }).blur(function () {
+                if ($("input#reg_password_confirm").val() != $("input#reg_password").val()) {
+                    $("#password_confirm_error").eq(0).show().text("× 两次密码输入不一致");
+                }
+                else {
+                    if ($("input#reg_password_confirm").val() == "") {
+                        $("#password_confirm_succe").eq(0).hide().text("");
+                        $("#password_confirm_error").eq(0).show().text("× 密码不能为空");
+                    }
+                    else {
+                        $("#password_confirm_succe").eq(0).show().text("√");
+                        $("#password_confirm_error").eq(0).hide().text("");
+                    }
+
+                }
+            })
+
+            $("#x_register").click(function(){
+                $("#register").hide();
+                $("#shadow").eq(0).css("opacity", "0").css("zIndex", "-1");
+            })
+
+        });
+
+        //提交前检查表单
+        function check() {
+            var result1 = register_verication(dom = $("input#id_username"), reg = /^[\u4e00-\u9fa5]{1,7}$|^[\dA-Za-z_]{1,14}$/)
+            var result2 = register_verication(dom = $("input#id_email"), reg = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/)
+            var result3 = register_verication(dom = $("input#id_password"), reg = /^\w{8,16}$/)
+            return result1 && result2 && result3;
+        }
+
+
+    </script>
+    <style>
+        input {
+            float: left;
+            padding: 5px;
+            border: black 1px solid;
+            width: 300px;
+            height: 24px;
+            margin-left: 5px;
+            outline: none;
+
+        }
+
+    </style>
 </head>
-<body>
+<body style="">
 
-{% include 'users/base/user_lable.html' %}
-<br/>
-<br/>
-<br/>
+<div id="register"
+     style="background: white;position: fixed;margin:0 auto; width: 800px; border: 1px black solid; z-index: 1000;display: none;">
 
-<div class="container">
-    {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
+    <div style="background: #dbf3ff; padding: 20px; border-bottom: #c3c3c3 1px solid;margin-bottom: 20px">
+        <h2 style="margin: 0 0 0 220px ">注册贴吧帐号</h2>
+        <div id="x_register" style="position: absolute; right: 120px; top: 25px">&times;</div>
+
+    </div>
+
+
+    {% if error %}
+        <p><strong>{{ error }}</strong></p>
     {% endif %}
-    <form action="" method="post" class="form-signin" _lpchecked="1">
-        <h2 class="form-signin-heading">Please register</h2>
-        {% csrf_token %}
-        <table>
-            {% for field in form %}
-                <tr>
-                    <td>{{ field.label_tag }}</td>
-                    <td>{{ field }}</td>
-                    <td>{{ field.errors }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-        <input type="submit" value="注册"/>
-    </form>
 
+    <form id="register_form" action="/user/register/" method="post" onsubmit="return check()">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div style="overflow: hidden">
+                {{ field.errors }}
+                <label for="{{ field.id_for_label }} "
+                       style="float: left;height: 40px;line-height: 40px; margin-right: 5px;text-align: right; width: 150px; font-weight: 600; font-size: 13px">{{ field.label }}:</label>
+                {{ field }}
+                {% if field.id_for_label == "reg_username" %}
+                    <span id="username_succe"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="username_error"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="username_tips"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                {% elif field.id_for_label == "reg_email" %}
+                    <span id="email_succe" style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="email_error" style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="email_tips" style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                {% elif field.id_for_label == "reg_password" %}
+                    <span id="password_succe"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="password_error"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="password_tips"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                {% elif field.id_for_label == "reg_password_confirm" %}
+                    <span id="password_confirm_succe"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="password_confirm_error"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                    <span id="password_confirm_tips"
+                          style="display: none;height: 40px;line-height: 40px;margin-left: 5px"></span>
+                {% endif %}
+                <script>
+                    $("#{{ field.id_for_label }}").css("border-radius", "5px").css("border-color", "rgb(169, 169, 169)")
+                </script>
+            </div>
+        {% endfor %}
+        <br/>
+        <div style="overflow: hidden;;">
+            <label for="reg_password" id="reg_label_password"
+                   style="float: left;height: 24px;line-height: 24px; margin-right: 5px;text-align: right; width: 150px"></label>
+
+            <input type="submit" value="注册"
+                   style="float: left;width: 310px;height: 24px; background-color: #21b7ff; color: white;font-weight: 700;font-size: 16px ;border: none;margin-left: 5px"/>
+
+        </div>
+    </form>
+<br/>
+<br/>
 </div>
 </body>
 </html>

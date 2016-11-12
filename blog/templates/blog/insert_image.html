@@ -1,0 +1,73 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <title>insert_image</title>
+    <link rel="stylesheet" href={% static "blog/css/ImgInput/ssi-uploader.css" %}>
+    <script src={% static "blog/js/ImgInput/ssi-uploader.js" %}></script>
+    <script>
+        $(document).ready(function () {
+
+            $("#x_insert_image").click(function () {
+                $('#ifm_image', window.parent.document).eq(0).hide()
+                $('#ifm_image', window.parent.document)[0].src = "#"
+                $('#shadow', window.parent.document).eq(0).css("opacity", "0").css("zIndex", "-1");
+
+            })
+
+            $('#ssi-upload').ssi_uploader({
+                url: '/media_process/fileUpload/',
+                maxFileSize: 10,
+                allowed: ['jpg', 'gif', 'bmp', 'png', 'jepg']
+            });
+            $('#ssi-upload2').ssi_uploader({url: '#', preview: false, allowed: ['jpg', 'gif', 'txt', 'png', 'pdf']});
+            $('#ssi-upload3').ssi_uploader({url: '#', dropZone: false, allowed: ['jpg', 'gif', 'txt', 'png', 'pdf']});
+
+            $("button#insert").click(function () {
+                for(var i=0; i<files.length;i++){
+                    $("div[contenteditable]", window.parent.document)[0].innerHTML += "<img src=" + files[i] + "/>"
+                }
+                $("#ifm_image", window.parent.document).eq(0).hide()
+                $("#shadow", window.parent.document).eq(0).css("opacity", "0").css("zIndex", "-1");
+            })
+        })
+        window.onload = function () {
+            $("body").height($("#insert_image").height());
+            $("body").width($("#insert_image").width());
+            parent.changeheight(id = "#ifm_image", height = $("body").outerHeight(true) )
+            parent.changewidth(id = "#ifm_image", width = $("body").outerWidth(true) )
+        }
+
+    </script>
+</head>
+<body style="">
+<div id="insert_image"
+     style="background: white;position:fixed;border: 5px #6d6d6d solid; width: 800px; max-height: 600px; overflow:hidden;z-index: 1000">
+    <h3 style="margin: 10px 0 10px 30px">插入图片（支持jpg、gif、png和bmp格式文件）</h3>
+    <div id="x_insert_image" style="position: absolute; right: 20px; top: 15px">&times;</div>
+
+    <div style="border: 1px solid gainsboro; margin: 0 20px"></div>
+    <div class="container" style="margin: 0 auto; width: 700px">
+        <div class="row" style="">
+            <div class="col-md-12">
+                <input type="file" multiple id="ssi-upload"/>
+            </div>
+        </div>
+        <div style="overflow:hidden; padding-bottom: 10px">
+            <button id="insert" type="button"
+                    style="float: right; margin-top: 10px;display: inline-block;text-align: center;vertical-align: middle;font-size: 12px;text-decoration: none;border: 1px solid #aeaeae;cursor: pointer;padding: 6px 6px;border-radius: 3px;color: whitesmoke;"
+                    disabled="true">插入
+            </button>
+            <style>
+                .buttoninsert:hover {
+                    background: #389e48;
+                }
+            </style>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
