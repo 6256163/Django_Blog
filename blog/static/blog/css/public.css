@@ -1,0 +1,53 @@
+/** 清除内外边距 **/
+body, h1, h2, h3, h4, h5, h6, hr,
+blockquote, /* structural elements 结构元素 */
+dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
+pre, /* text formatting elements 文本格式元素 */
+form, fieldset, legend, input, textarea, /* form elements 表单元素
+th, td, /* table elements 表格元素 */
+img/* img elements 图片元素 */{
+border:medium none;
+margin: 0;
+padding: 0;
+}
+/** 设置默认字体 **/
+h1, h2, h3, h4, h5, h6 { font-size: 100%; }
+em{font-style:normal;}
+/** 重置列表元素 **/
+ul, ol { list-style: none; }
+/** 重置超链接元素 **/
+a { text-decoration: none;}
+a:hover { text-decoration: underline;}
+/** 重置图片元素 **/
+img{ border:0px;}
+/** 重置表格元素 **/
+table { border-collapse: collapse; border-spacing: 0; }
+
+.middle {
+    margin: 0 auto;
+}
+
+.float {
+    position: fixed;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+
+.hidden {
+    overflow: hidden;
+}
+
+
+.text {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.head_img{
+    border: 1px solid #c3c3c3;
+}

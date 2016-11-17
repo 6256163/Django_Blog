@@ -14,7 +14,7 @@ class Blog(models.Model):
     blog_text = models.TextField(null=False)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
     reply_counter = models.IntegerField(default=0)
-    latest_reply = models.ForeignKey(User, related_name='latest_reply', null= True)
+    latest_reply = models.DateTimeField('date latest_reply', auto_now_add=True)
 
     class Meta:
         ordering = ('pub_date',)
@@ -43,6 +43,7 @@ def update_floor(sender,created, instance, **kwargs):
         instance.floor = Blog.objects.get(pk=instance.blog.id).reply_counter + 1
         instance.save()
         instance.blog.reply_counter+=1
+        instance.blog.latest_reply=instance.pub_date
         instance.blog.save()
 
 

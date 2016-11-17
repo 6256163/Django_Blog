@@ -2,15 +2,17 @@
 from __future__ import unicode_literals
 from blog.models import Blog, Reply, ReplyInReply
 from rest_framework import serializers
+from users.serializers import UserSerializer
 
 
 class BlogSerializer(serializers.HyperlinkedModelSerializer):
 
     user = serializers.ReadOnlyField(source='user.username')
+    head_img = serializers.ReadOnlyField(source='user.person.head_img.url')
 
     class Meta:
         model = Blog
-        fields = ('url', 'id', 'blog_title', 'blog_text', 'pub_date','user','reply_counter','latest_reply')
+        fields = ('url', 'id', 'blog_title', 'blog_text', 'pub_date','user','head_img','reply_counter','latest_reply')
 
     def create(self, validated_data):
         """
@@ -31,10 +33,11 @@ class BlogSerializer(serializers.HyperlinkedModelSerializer):
 class ReplySerializer(serializers.HyperlinkedModelSerializer):
 
     user = serializers.ReadOnlyField(source='user.username')
+    head_img = serializers.ReadOnlyField(source='user.person.head_img.url')
 
     class Meta:
         model = Reply
-        fields = ('url','id', 'reply_text','floor', 'pub_date', 'blog', 'reply_counter', 'user')
+        fields = ('url','id', 'reply_text','floor', 'pub_date', 'blog', 'reply_counter', 'user','head_img')
 
     def create(self, validated_data):
         return Reply.objects.create(**validated_data)
@@ -48,9 +51,10 @@ class ReplySerializer(serializers.HyperlinkedModelSerializer):
 class ReplyInReplySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     reply_id = serializers.IntegerField(source='reply.id')
+    head_img = serializers.ReadOnlyField(source='user.person.head_img.url')
     class Meta:
         model = ReplyInReply
-        fields = ('url', 'id', 'reply_text', 'pub_date', 'reply', 'reply_id',  'user')
+        fields = ('url', 'id', 'reply_text', 'pub_date', 'reply', 'reply_id',  'user','head_img')
 
     def create(self, validated_data):
         return ReplyInReply.objects.create(**validated_data)

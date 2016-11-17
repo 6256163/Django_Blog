@@ -114,6 +114,9 @@ def api_root(request, format=None):
     })
 
 
+def home(request):
+    return render(request, 'blog/home.html')
+
 
 
 def index(request):

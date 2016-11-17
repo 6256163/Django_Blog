@@ -7,6 +7,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <script src={% static "blog/js/blog.js" %}></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <link href={% static "blog/css/blog_index.css" %} rel="StyleSheet" type="text/css">
+    <link href={% static "blog/css/public.css" %} rel="StyleSheet" type="text/css">
     <script>
         function onmouseover_blog(dom) {
             //鼠标悬停帖子，栏位变色
@@ -74,16 +76,16 @@
             });
 
             $("button#post_blog").click(function () {
-                var blogtext= "";
-                for (var i=0; i<$("#blog_text").contents().length;i++){
-                    if ($("#blog_text").contents()[i].nodeName == "IMG"){
-                        blogtext+=$("#blog_text").contents()[i].outerHTML;
+                var blogtext = "";
+                for (var i = 0; i < $("#blog_text").contents().length; i++) {
+                    if ($("#blog_text").contents()[i].nodeName == "IMG") {
+                        blogtext += $("#blog_text").contents()[i].outerHTML;
                     }
-                    if ($("#blog_text").contents()[i].nodeName == "#text"){
-                        blogtext+=$("#blog_text").contents()[i].data+"\n";
+                    if ($("#blog_text").contents()[i].nodeName == "#text") {
+                        blogtext += $("#blog_text").contents()[i].data + "\n";
                     }
-                    if ($("#blog_text").contents()[i].nodeName == "DIV"){
-                        blogtext+=$("#blog_text").contents()[i].innerText+(($("#blog_text").contents()[i].innerText == "\n") ? "" : "\n");
+                    if ($("#blog_text").contents()[i].nodeName == "DIV") {
+                        blogtext += $("#blog_text").contents()[i].innerText + (($("#blog_text").contents()[i].innerText == "\n") ? "" : "\n");
                     }
 
                 }
@@ -113,8 +115,10 @@
                 else {
                     $(".page a")[i - 1].href = url[0] + "?page=" + i;
                 }
+
                 if ($(".page a")[i - 1].href == window.location.href) {
                     $(".page a")[i - 1].removeAttribute("href");
+                    $(".page a").eq(i - 1).css("font-weight", "bold")
                 }
             }
 
@@ -151,79 +155,77 @@
 <iframe id="ifm_image" src="" scrolling="no"
         style="position: fixed; border: none;margin: auto; left:0; right: 0 ;z-index: 1000;display: none"></iframe>
 {% include 'blog/navigation.html' %}
-<div style="position:fixed;left:50%; top: 100px;margin-left:400px;z-index: 998;">
+<div class="float sidebar">
 
     <ul class="float" style="padding:10px;">
 
-        <li id="to_page_top" style="list-style:none"><a
-                style="background:url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        <li id="to_page_top"><a
+                style="background:url({% static "blog/pic/float_icon.png" %});"></a>
         </li>
-        <li id="refresh_page" style="list-style:none"><a
-                style="background:0 -55px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        <li id="refresh_page"><a
+                style="background:0 -55px url({% static "blog/pic/float_icon.png" %});"></a>
         </li>
-        <li id="post_blog" style="list-style:none"><a
-                style=" background:0 -165px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px;"></a>
+        <li id="post_blog"><a
+                style=" background:0 -165px url({% static "blog/pic/float_icon.png" %});"></a>
         </li>
-        <li style="list-style:none"><a
-                style="background:0 -275px url({% static "blog/pic/float_icon.png" %});display:inline-block;width:45px;height:45px; "></a>
+        <li id="share_tieba"><a
+                style="background:0 -275px url({% static "blog/pic/float_icon.png" %});"></a>
         </li>
     </ul>
 </div>
-<div id="blog_list_outer"
-     style="width:800px;margin:0 auto; border-left:1px solid black; border-right: 1px solid black; background-color: #ffffff">
-    <ul style="margin:0; padding:0;">
+<div id="blog_list_outer" class="list_outer middle">
+    <ul>
         {% for b in blog.results %}
             <li onmouseover="onmouseover_blog(this)" onmouseout="onmouseout_blog(this)"
-                style="list-style-type:none; border-top:1px solid black">
-                <div style="overflow:hidden;">
-                    <div style="float:left;width:8%;margin-left: 20px;margin-top: 10px;">
-                        <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover; width:50px; height:30px;font-size:12px; display:block; text-align:center">{{ b.reply_counter }}</span>
+                style="border-top:1px solid black">
+                <div class="hidden">
+                    <div class="reply_bubble" align="center">
+                        <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover;">{{ b.reply_counter }}</span>
                     </div>
-                    <div style="float:left;width:88%;margin-right:5px;margin-top:5px;overflow:hidden;margin-bottom: 5px;">
-                        <div style="overflow:hidden;margin-top: 5px;">
-                            <div style="float:left; width:70%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden">
-                                <a href="{{ b.url }}" title="{{ b.blog_title }}"
-                                   style="text-decoration:none">{{ b.blog_title }}</a>
+                    <div class="blog_outer hidden">
+                        <div class="hidden blog_info">
+                            <div class="text blog_title">
+                                <a id="{{ b.url }}" href="{{ b.url }}" title="{{ b.blog_title }}"
+                                   onclick="show_blog_detail(this);return false;">{{ b.blog_title }}</a>
 
                             </div>
 
-                            <div style="float:left;width:14%;margin-right: 10px;">
-                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
-                                    {{ b.user }}</p>
-                            </div>
 
-                            <div style="float:right; width:10%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden">
-                                <p></p>
+                            <div class="blog_date">
+                                <p>
+                                    {{ b.pub_date|slice:"5:10" }}
+                                    {{ b.pub_date|slice:"11:16" }}
+                                </p>
                             </div>
-
+                            <div class="text blog_user">
+                                <p>{{ b.user }}</p>
+                            </div>
                         </div>
 
 
-                        <div style="overflow:hidden;margin-top: 10px;margin-bottom: 10px;">
+                        <div class="hidden reply_info">
 
-                            <div style="float:left; width:70%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden; font-size:12px">
-                                <div style="width: 95%">
-                                    <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">{{ b.blog_text }}</p>
+                            <div class="blog_title" style="font-size:12px">
+                                <div style="width: 95%;">
+                                    <p class="text">{{ b.blog_text }}</p>
                                 </div>
                             </div>
 
-                            <div style="float:left;width:14%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-right: 10px;">
-                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
+
+
+                            <div class="blog_date">
+                                <p>
+                                    {{ b.latest_reply|slice:"5:10" }}
+                                    {{ b.latest_reply|slice:"11:16" }}
+                                </p>
+                            </div>
+
+                            <div class="text blog_user" style="">
+                                <p>
                                     {% if  b.latest_reply %}
                                         {{ b.latest_reply.user }}
                                     {% else %}
                                         {{ b.user }}
-                                    {% endif %}
-                                </p>
-                            </div>
-
-                            <div style="float:right; width:10%;text-overflow:ellipsis;white-space:nowrap; overflow:hidden; font-size:12px">
-                                <p style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;font-size:12px;margin-top: 0;margin-bottom: 0;">
-                                    {% if  b.latest_reply %}
-                                        {{ b.latest_reply.pub_date|slice:"5:10" }}
-                                        {{ b.latest_reply.pub_date|slice:"11:16" }}
-                                    {% else %}
-                                        {{ b.pub_date|slice:"5:10" }} {{ b.pub_date|slice:"11:16" }}
                                     {% endif %}
                                 </p>
                             </div>
@@ -236,8 +238,8 @@
             </li>
         {% endfor %}
     </ul>
-    <div style="overflow:hidden; padding-left: 10px; padding-top: 10px; margin-bottom: 10px; border-top: solid 1px #000000">
-        <div style="float: left; margin-right: 5px">
+    <div class="page_outer hidden">
+        <div class="page_previous_next">
             {% if blog.previous == None %}
                 <a></a>
             {% else %}
@@ -247,10 +249,10 @@
 
         {% if blog.count|divide:10 > 1 %}
             {% for i in blog.count|divide:10|list %}
-                <div class="page" style="float: left; margin-right: 5px"><a>{{ i }}</a></div>
+                <div class="page"><a>{{ i }}</a></div>
             {% endfor %}
         {% endif %}
-        <div style="float: left; margin-right: 5px">
+        <div class="page_previous_next">
             {% if blog.next == None %}
                 <a></a>
             {% else %}
@@ -259,22 +261,21 @@
 
         </div>
     </div>
-    <div id="div_post_blog"
-         style="padding-left: 10px; background-color:#f7f7f7; border-top:1px solid black; border-bottom:1px solid black">
+    <div id="div_post_blog" class="post_blog_outer">
 
         <div style="margin: 10px">
             <a><strong>发表新贴</strong></a>
             <a>发起投票</a>
         </div>
 
-        <div style="margin: 10px; overflow: hidden">
+        <div class="hidden" style="margin: 10px;">
             <input id="blog_title" type="text" placeholder="请填写标题" name="blog_title" style="width: 80%"/>
         </div>
 
         <div>
             <div style="margin: 10px">
                 <div style="width: 90%; border:1px solid black">
-                    <div style="margin: 5px; padding-left: 5px">
+                    <div class="insert_media">
                         <a id="a_insert_img">图片</a>
                         <a>视频</a>
                         <a>音乐</a>
@@ -284,9 +285,7 @@
 
                     <div>
                         <div>
-                            <div id="blog_text" name="blog_text" style="height: 220px;overflow-y: auto;overflow-x: hidden ;z-index: 0; border: solid 1px #999999;
-                                background-color: #ffffff; margin: 10px"
-                                 contenteditable="true">
+                            <div id="blog_text" class="blog_text_edit" name="blog_text" contenteditable="true">
                             </div>
 
                             <div style="display: none;">

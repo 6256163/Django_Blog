@@ -9,7 +9,6 @@ router = DefaultRouter()
 router.register(r'blog', views.BlogViewSet)
 router.register(r'replies', views.ReplyViewSet)
 router.register(r'reply_in_reply', views.ReplyInReplyViewSet)
-
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^$', views.api_root),

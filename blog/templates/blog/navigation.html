@@ -48,7 +48,7 @@
                 {% if user.is_authenticated %}
                     <div onmouseover="mouseover_to_show_list(this)" onmouseout="mouseover_to_hide_list(this)"
                          style="overflow: hidden; z-index: 1; margin-right: 5px">
-                    <p style="margin-bottom: 0"><a href="/user/my_info/" style="text-decoration: none">{{ user }}</a>
+                    <p style="margin-bottom: 0"><a href="/user/my_info/">{{ user }}</a>
                     </p>
 
                 {% else %}
@@ -75,7 +75,7 @@
                 <li style="list-style-type:none; float:left;position: relative;">
                     <div onmouseover="mouseover_to_show_list(this)" onmouseout="mouseover_to_hide_list(this)"
                          style="overflow: hidden; z-index: 1;">
-                        <p style="margin-bottom: 0">设置</p>
+                        <p><a style="margin-bottom: 0">设置</a></p>
                         <ul style="margin:0;padding:0; display:none;position: absolute;right: 0;border: solid 1px #000000; background-color: #ffffff;box-shadow: 1px 1px 2px #ccc">
                             <li id="account_setting" style="list-style-type:none;">
                                 <a href=""
