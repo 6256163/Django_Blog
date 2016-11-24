@@ -15,7 +15,7 @@ from rest_framework.permissions import AllowAny
 
 from . import forms
 from django import http
-from .models import Relationship, Notice, Person
+from .models import Person
 from rest_framework import viewsets
 from users.serializers import UserSerializer
 from rest_framework.decorators import api_view, detail_route, list_route, permission_classes
@@ -27,12 +27,15 @@ from rest_framework.reverse import reverse
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    This viewset provides `list`, `create`, `retrieve`, `update` and `destroy` actions.
+
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    # permission_classes = [IsAccountAdminOrReadOnly]
-
     @detail_route(methods=['get'])
+    # 查询指定用户的所有blog
     def blog(self, request, pk):
         user = self.get_object()
         blog_queryset = Blog.objects.filter(user=user)
@@ -45,6 +48,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
+    # 查询指定用户的所有reply
     def reply(self, request, pk):
         user = self.get_object()
         reply_queryset = Reply.objects.filter(user=user)
@@ -57,7 +61,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
@@ -67,8 +70,9 @@ def api_root(request, format=None):
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
+# 注册验证
 def register_verification(request):
-    if request.data.get("type")=="username":
+    if request.data.get("type") == "username":
         if request.data.get("username") != "" or request.data.get("username") != None:
             try:
                 User.objects.get(username=request.data.get("username"))
@@ -95,7 +99,7 @@ def register_verification(request):
 @permission_classes((AllowAny,))
 def register(request):
     """
-    Regist a new user
+    新用户注册
     :param request:
     :return: to login page
     """
@@ -107,14 +111,15 @@ def register(request):
                     if form.is_valid():
                         form.cleaned_data.pop("password_confirm")
                         user = User.objects.create_user(**form.cleaned_data)
-                        Person.objects.create(user =  user)
-                        login_user = auth.authenticate(username= form.data['username'], password = form.data['password'])
+                        Person.objects.create(user=user)
+                        login_user = auth.authenticate(username=form.data['username'], password=form.data['password'])
                         auth.login(request, login_user)
                         next = request.GET.get("next") if (request.GET.get("next") not in ["/user/login/",
                                                                                            "/user/register/",
                                                                                            "/user/register_login_success/", ]) else '/blog/'
-                        return http.HttpResponseRedirect("/user/register_login_success/?%s" % urllib.urlencode({'next':next}))
-                        #return render(request, 'users/register_login_success.html',{'info':'register'})
+                        return http.HttpResponseRedirect(
+                            "/user/register_login_success/?%s" % urllib.urlencode({'next': next}))
+                        # return render(request, 'users/register_login_success.html',{'info':'register'})
                     else:
                         return render(request, 'blog/index.html', {'form': form})
 
@@ -131,7 +136,7 @@ def register(request):
 
 def login(request):
     """
-    Login user
+    用户登录
     :param request:
     :return: to blog index
     """
@@ -154,13 +159,19 @@ def login(request):
         return render(request, 'blog/index.html', {'form': form})
 
 
+
 def register_login_success(request):
-    return render(request, 'users/register_login_success.html',{'next':request.GET.get("next")})
+    """
+    登录成功页
+    :param request:
+    :return: to blog index
+    """
+    return render(request, 'users/register_login_success.html', {'next': request.GET.get("next")})
 
 
 def logout(request):
     """
-    logout user
+    用户登出
     :param request:
     :return: to blog index
     """
@@ -168,32 +179,24 @@ def logout(request):
     return http.HttpResponseRedirect(request.GET.get("next"))
 
 
-def show_permission(request):
-    """
-    Get the user permission
-    :param request:
-    :return: to permission page
-    """
-    permission = request.user.user_permissions.all()
-    return render(request, 'users/permission.html', {'permission': permission, 'user': request.user})
-
-
 def my_info(request):
     """
-    Gte user info: username, email, first_name, last_name, permission.
+    跳转 用户信息页面
     :param request:
     :return: to user info page
     """
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('/user/login/')
     else:
-        return render(request, 'users/my_info.html', {'user': request.user,
-                                                      "permission": request.user.user_permissions.all(),
-                                                      'followers': find_all_followers(request),
-                                                      })
+        return render(request, 'users/my_info.html', {'user': request.user,})
 
 
 def update_user_info(request):
+    """
+    更新用户信息：生日，出生地，性别，个人说明
+    :param request:
+    :return: to update_user_info page
+    """
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
     else:
@@ -218,6 +221,11 @@ def update_user_info(request):
 
 
 def headimg_setting(request):
+    """
+    更新用户头像
+    :param request:
+    :return: to headimg_setting page
+    """
     if not request.user.is_authenticated():
         return http.HttpResponseRedirect('users/login')
     else:
@@ -226,7 +234,7 @@ def headimg_setting(request):
             if form.is_valid():
                 person = Person.objects.filter(user=request.user)
                 if not person:
-                    p = Person.objects.create(user=request.user,)
+                    p = Person.objects.create(user=request.user, )
                     p.head_img = form.cleaned_data['head_img']
                     p.save()
                 else:
@@ -240,29 +248,3 @@ def headimg_setting(request):
         else:
             form = forms.HeadImgForm()
             return render(request, 'users/headimg_setting.html', {'user': request.user, 'form': form})
-
-
-
-
-def find_all_followers(request):
-    if not request.user.is_authenticated():
-        return http.HttpResponseRedirect('users/login')
-    else:
-        followers = Relationship.objects.filter(current_user=request.user)
-        return followers
-
-
-def news_count(request):
-    if not request.user.is_authenticated():
-        return http.HttpResponseRedirect('users/login')
-    else:
-        notices = Notice.objects.filter(to_user=request.user, flag=1)
-        return notices
-
-
-def news(request):
-    n = news_count(request)
-    for f in n:
-        f.flag = 0
-        f.save()
-    return render(request, 'users/news.html', {'news': n, })

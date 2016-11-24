@@ -1,8 +1,12 @@
+# coding=utf-8
 import re
 from django.contrib.auth.models import User
 
 
 class MyBackend(object):
+    """
+    自定义后端，用作登录验证
+    """
     def authenticate(self, username=None, password=None):
         if username:
             # email

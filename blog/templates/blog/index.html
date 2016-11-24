@@ -5,8 +5,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <script src={% static "blog/js/blog.js" %}></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script src={% static "blog/js/blog.js" %}></script>
     <link href={% static "blog/css/blog_index.css" %} rel="StyleSheet" type="text/css">
     <link href={% static "blog/css/public.css" %} rel="StyleSheet" type="text/css">
     <script>
@@ -75,38 +75,13 @@
                 }
             });
 
-            $("button#post_blog").click(function () {
-                var blogtext = "";
-                for (var i = 0; i < $("#blog_text").contents().length; i++) {
-                    if ($("#blog_text").contents()[i].nodeName == "IMG") {
-                        blogtext += $("#blog_text").contents()[i].outerHTML;
-                    }
-                    if ($("#blog_text").contents()[i].nodeName == "#text") {
-                        blogtext += $("#blog_text").contents()[i].data + "\n";
-                    }
-                    if ($("#blog_text").contents()[i].nodeName == "DIV") {
-                        blogtext += $("#blog_text").contents()[i].innerText + (($("#blog_text").contents()[i].innerText == "\n") ? "" : "\n");
-                    }
 
-                }
-
-                $.ajax({
-                    type: "POST",
-                    url: "",
-                    data: JSON.stringify({
-                        "blog_title": $("#blog_title").val(),
-                        "blog_text": blogtext
-                    }),
-                    contentType: "application/json",
-                    dataType: "json",
-                    success: function (msg) {
-                        location.href = msg.blog.id;
-                    }
-                });
-            });
         });
 
         $(document).ready(function () {
+
+            $("#blog_list_outer").css("margin-left", (document.body.clientWidth - $("#blog_list_outer").outerWidth()) / 2).css("float", "left");
+
             var url = window.location.href.split("?");
             for (var i = 1; i <= $(".page").length; i++) {
                 if (i == 1) {
@@ -139,10 +114,21 @@
             })
 
             $("#a_insert_img").click(function () {
-                $("#ifm_image")[0].src = "/media_process/fileUpload/"
+                $("#ifm_image")[0].src = "/media_process/fileUpload/";
                 $("#ifm_image").eq(0).show().css("top", "100px");//.css("left", document.body.clientWidth / 2 - $("#ifm_image").width() / 2 + "px");
                 $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
             })
+
+            window.onload = function () {
+                $("#blog_detail_outer").css("max-height", "document.body.clientHeight");
+            }
+            show_blog_img(".blog_title p","");
+            for (var i=0;i<$(".blog_title p").length;i++){
+
+                $(".blog_title p")[i].innerHTML=$(".blog_title p")[i].innerText;
+            }
+
+
         });
 
 
@@ -155,7 +141,7 @@
 <iframe id="ifm_image" src="" scrolling="no"
         style="position: fixed; border: none;margin: auto; left:0; right: 0 ;z-index: 1000;display: none"></iframe>
 {% include 'blog/navigation.html' %}
-<div class="float sidebar">
+<div id="sidebar" class="float sidebar">
 
     <ul class="float" style="padding:10px;">
 
@@ -173,146 +159,157 @@
         </li>
     </ul>
 </div>
-<div id="blog_list_outer" class="list_outer middle">
-    <ul>
-        {% for b in blog.results %}
-            <li onmouseover="onmouseover_blog(this)" onmouseout="onmouseout_blog(this)"
-                style="border-top:1px solid black">
-                <div class="hidden">
-                    <div class="reply_bubble" align="center">
-                        <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover;">{{ b.reply_counter }}</span>
-                    </div>
-                    <div class="blog_outer hidden">
-                        <div class="hidden blog_info">
-                            <div class="text blog_title">
-                                <a id="{{ b.url }}" href="{{ b.url }}" title="{{ b.blog_title }}"
-                                   onclick="show_blog_detail(this);return false;">{{ b.blog_title }}</a>
-
-                            </div>
-
-
-                            <div class="blog_date">
-                                <p>
-                                    {{ b.pub_date|slice:"5:10" }}
-                                    {{ b.pub_date|slice:"11:16" }}
-                                </p>
-                            </div>
-                            <div class="text blog_user">
-                                <p>{{ b.user }}</p>
-                            </div>
+<div class="hidden">
+    <div id="blog_list_outer" class="list_outer">
+        <ul>
+            {% for b in blog.results %}
+                <li onmouseover="onmouseover_blog(this)" onmouseout="onmouseout_blog(this)"
+                    style="border-top:1px solid black">
+                    <div class="hidden">
+                        <div class="reply_bubble" align="center">
+                            <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover;">{{ b.reply_counter }}</span>
                         </div>
+                        <div class="blog_outer hidden">
+                            <div class="hidden blog_info">
+                                <div class="text blog_title">
+                                    <a id="{{ b.id }}" href="{{ b.url }}" title="{{ b.blog_title }}"
+                                       onclick="show_blog_detail(this);return false;">{{ b.blog_title }}</a>
+
+                                </div>
 
 
-                        <div class="hidden reply_info">
-
-                            <div class="blog_title" style="font-size:12px">
-                                <div style="width: 95%;">
-                                    <p class="text">{{ b.blog_text }}</p>
+                                <div class="blog_date">
+                                    <p>
+                                        {{ b.pub_date|slice:"5:10" }}
+                                        {{ b.pub_date|slice:"11:16" }}
+                                    </p>
+                                </div>
+                                <div class="text blog_user">
+                                    <p>{{ b.user }}</p>
                                 </div>
                             </div>
 
 
+                            <div class="hidden reply_info">
 
-                            <div class="blog_date">
-                                <p>
-                                    {{ b.latest_reply|slice:"5:10" }}
-                                    {{ b.latest_reply|slice:"11:16" }}
-                                </p>
+                                <div class="blog_title" style="font-size:12px">
+                                    <div style="width: 95%;">
+                                        <p class="text">{{ b.blog_text }}</p>
+                                    </div>
+                                </div>
+
+
+                                <div class="blog_date">
+                                    <p>
+                                        {{ b.latest_reply|slice:"5:10" }}
+                                        {{ b.latest_reply|slice:"11:16" }}
+                                    </p>
+                                </div>
+
+                                <div class="text blog_user" style="">
+                                    <p>
+                                        {{ b.latest_reply_user }}
+                                    </p>
+                                </div>
+
                             </div>
 
-                            <div class="text blog_user" style="">
-                                <p>
-                                    {% if  b.latest_reply %}
-                                        {{ b.latest_reply.user }}
-                                    {% else %}
-                                        {{ b.user }}
-                                    {% endif %}
-                                </p>
-                            </div>
 
                         </div>
-
-
                     </div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-    <div class="page_outer hidden">
-        <div class="page_previous_next">
-            {% if blog.previous == None %}
-                <a></a>
-            {% else %}
-                <a href=" {{ blog.previous }} ">上一页</a>
-            {% endif %}
-        </div>
-
-        {% if blog.count|divide:10 > 1 %}
-            {% for i in blog.count|divide:10|list %}
-                <div class="page"><a>{{ i }}</a></div>
+                </li>
             {% endfor %}
-        {% endif %}
-        <div class="page_previous_next">
-            {% if blog.next == None %}
-                <a></a>
-            {% else %}
-                <a href="{{ blog.next }}">下一页</a>
-            {% endif %}
+        </ul>
+        <div class="page_outer hidden">
+            <div id="blog_list_previous_page" class="page_previous_next">
+                {% if blog.previous == None %}
+                    <a></a>
+                {% else %}
+                    <a href=" {{ blog.previous }}" onclick="show_blog_list(this);return false;">上一页</a>
+                {% endif %}
+            </div>
+            <div id="page">
+                <form id="blog_list_page_turn">
 
+                    <input id="page_to_turn" style="width: 20px;float: left;padding: 0;height: 20px;" value="1"/>
+                    <p class="total_page" style="float: left;margin: 0">
+                        <script>
+                            $(".total_page").text(Math.ceil({{ blog.count }} / 10)
+                            )
+                            ;
+                        </script>
+                    </p>
+
+                    <button type="submit" style="float: left">GO</button>
+                </form>
+            </div>
+
+            <div id="blog_list_next_page" class="page_previous_next">
+                {% if blog.next == None %}
+                    <a></a>
+                {% else %}
+                    <a href="{{ blog.next }}" onclick="show_blog_list(this);return false;">下一页</a>
+                {% endif %}
+
+            </div>
         </div>
-    </div>
-    <div id="div_post_blog" class="post_blog_outer">
+        <div id="div_post_blog" class="post_blog_outer">
 
-        <div style="margin: 10px">
-            <a><strong>发表新贴</strong></a>
-            <a>发起投票</a>
-        </div>
-
-        <div class="hidden" style="margin: 10px;">
-            <input id="blog_title" type="text" placeholder="请填写标题" name="blog_title" style="width: 80%"/>
-        </div>
-
-        <div>
             <div style="margin: 10px">
-                <div style="width: 90%; border:1px solid black">
-                    <div class="insert_media">
-                        <a id="a_insert_img">图片</a>
-                        <a>视频</a>
-                        <a>音乐</a>
-                        <a>表情</a>
-                        <a>附件</a>
-                    </div>
+                <a><strong>发表新贴</strong></a>
+                <a>发起投票</a>
+            </div>
 
-                    <div>
+            <div class="hidden" style="margin: 10px;">
+                <input id="blog_title" type="text" placeholder="请填写标题" name="blog_title" style="width: 80%"/>
+            </div>
+
+            <div>
+                <div style="margin: 10px">
+                    <div style="width: 90%; border:1px solid black">
+                        <div class="insert_media">
+                            <a id="a_insert_img">图片</a>
+                            <a>视频</a>
+                            <a>音乐</a>
+                            <a>表情</a>
+                            <a>附件</a>
+                        </div>
+
                         <div>
-                            <div id="blog_text" class="blog_text_edit" name="blog_text" contenteditable="true">
-                            </div>
+                            <div>
+                                <div id="blog_text" class="blog_text_edit" name="blog_text" contenteditable="true">
+                                </div>
 
-                            <div style="display: none;">
-                                <div>想用@提到谁？</div>
-                                <ul></ul>
-                            </div>
-                            <div style="display: none;">
-                                <div>添加什么话题?</div>
-                                <ul></ul>
+                                <div style="display: none;">
+                                    <div>想用@提到谁？</div>
+                                    <ul></ul>
+                                </div>
+                                <div style="display: none;">
+                                    <div>添加什么话题?</div>
+                                    <ul></ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <br/>
+            <br/>
 
-        <div>
-            <button id="post_blog" title="Ctrl+Enter快捷发表">
-                发 表
-            </button>
+            <div>
+                <button id="post_blog" title="Ctrl+Enter快捷发表">
+                    发 表
+                </button>
+            </div>
+            <br/>
         </div>
-        <br/>
+
     </div>
 
+    <div id="blog_detail_outer"
+         style="position: fixed; border: 1px solid black;background-color: #ffffff;display: none;overflow:auto"></div>
 </div>
-
 
 </body>
 </html>
+
+

@@ -1,5 +1,6 @@
-__author__ = 'TT'
 from rest_framework import permissions
+
+__author__ = 'TT'
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):

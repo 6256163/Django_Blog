@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
+#省市级联关系
 provinceList = [
     {'name': u'北京', 'cityList': [
         {'name': u'市辖区',

@@ -118,35 +118,7 @@
                 }
             });
 
-            //提交回复
-            $("button#subbtn").click(function () {
-                var replytext = "";
-                for (var i = 0; i < $("#reply_text_reply").contents().length; i++) {
-                    if ($("#reply_text_reply").contents()[i].nodeName == "IMG") {
-                        replytext += $("#reply_text_reply").contents()[i].outerHTML;
-                    }
-                    if ($("#reply_text_reply").contents()[i].nodeName == "#text") {
-                        replytext += $("#reply_text_reply").contents()[i].data + "\n";
-                    }
-                    if ($("#reply_text_reply").contents()[i].nodeName == "DIV") {
-                        replytext += $("#reply_text_reply").contents()[i].innerText + (($("#blog_text").contents()[i].innerText == "\n") ? "" : "\n");
-                    }
 
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "/replies/",
-                    data: JSON.stringify({
-                        "blog": "{{ blog.url }}",
-                        "reply_text": replytext
-                    }),
-                    contentType: "application/json",
-                    dataType: "json",
-                    success: function (msg) {
-                        window.location.href = msg.blog;
-                    }
-                });
-            });
         });
 
 
@@ -204,7 +176,7 @@
 {% include 'blog/navigation.html' %}
 <div class="list_outer middle">
 
-    <div class="blog_title">
+    <div class="blog_detail_title">
         <strong>
             <p id="blog_title">{{ blog.blog_title }}</p>
         </strong>
@@ -225,7 +197,7 @@
             <div class="blog_text">
                 <p id="blog_text">{{ blog.blog_text }}</p>
             </div>
-            <div class="blog_info hidden">
+            <div class="blog_detail_info hidden">
                 <div id="blog_reply_button" style=" float:right;">
                     <p><a>&ensp;回复</a>&ensp;&ensp;&ensp;</p>
                 </div>
@@ -246,7 +218,7 @@
     {% for reply in replies.results %}
 
         <div style="overflow:hidden; border-top:solid 1px #999999;">
-            <div class="user_info_outer" >
+            <div class="user_info_outer">
                 {% if reply.user_obj == blog.user_obj %}
                     <div class="lz_corner">楼主</div>
                 {% endif %}
@@ -259,10 +231,10 @@
                 </div>
             </div>
             <div class="blog_text_outer">
-                <div class="blog_text" >
+                <div class="blog_text">
                     <p class="reply_text" id="reply_text">{{ reply.reply_text }}</p>
                 </div>
-                <div class="blog_info hidden">
+                <div class="blog_detail_info hidden">
                     <div onclick="hide_replay(this)" id="hide_reply_index" class="hide_reply_index">
                         <p>收起回复</p>
                     </div>
@@ -299,11 +271,21 @@
             {% endif %}
         </div>
 
-        {% if replies.count|divide:10 > 1 %}
-            {% for i in replies.count|divide:10|list %}
-                <div class="page"><a>{{ i }}</a></div>
-            {% endfor %}
-        {% endif %}
+        <div id="page">
+            <form id="blog_detail_page_turn">
+
+                <input id="page_to_turn" style="width: 20px;float: left;padding: 0;height: 20px;" value="1"/>
+                <p class="total_page" style="float: left;margin: 0">
+                    <script>
+                        $(".total_page").text(Math.ceil({{ replies.count }} / 10)
+                        )
+                        ;
+                    </script>
+                </p>
+
+                <button type="submit" style="float: left">GO</button>
+            </form>
+        </div>
 
         <div class="page_previous_next">
             {% if replies.next == None %}
@@ -315,43 +297,41 @@
         </div>
     </div>
 
-    <div style="padding-left: 10px; background-color:#f7f7f7; border-top:1px solid black; border-bottom:1px solid black">
+    <div class="post_blog_outer">
 
         <div style="margin: 10px">
             <a><strong>发表回复</strong></a>
         </div>
 
-        <div>
-            <div style="margin: 10px">
-                <div style="width: 90%; border:1px solid black">
-                    <div class="insert_media">
-                        <a id="a_insert_img">图片</a>
-                        <a>视频</a>
-                        <a>音乐</a>
-                        <a>表情</a>
-                        <a>附件</a>
-                    </div>
 
-                    <div>
-                        <div>
-                            <div id="reply_text_reply" name="reply_text" class="blog_text_edit" contenteditable="true"></div>
-                            <div style="display: none;">
-                                <div>想用@提到谁？</div>
-                                <ul></ul>
-                            </div>
-                            <div style="display: none;">
-                                <div>添加什么话题?</div>
-                                <ul></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div style="margin: 10px;width: 90%; border:1px solid black">
+            <div class="insert_media">
+                <a id="a_insert_img">图片</a>
+                <a>视频</a>
+                <a>音乐</a>
+                <a>表情</a>
+                <a>附件</a>
             </div>
+
+
+            <div id="reply_text_reply" name="reply_text" class="blog_text_edit" contenteditable="true"></div>
+            <div style="display: none;">
+                <div>想用@提到谁？</div>
+                <ul></ul>
+            </div>
+            <div style="display: none;">
+                <div>添加什么话题?</div>
+                <ul></ul>
+            </div>
+
+
         </div>
+
+
         <br/>
 
         <div>
-            <button id="subbtn" title="Ctrl+Enter快捷发表">
+            <button id="subbtn" title="Ctrl+Enter快捷发表" name="{{ blog.url }}">
                 发 表
             </button>
         </div>

@@ -51,3 +51,11 @@ button {
 .head_img{
     border: 1px solid #c3c3c3;
 }
+
+.total_page:before {
+    content: "/"
+}
+
+.total_page:after {
+    content: "页"
+}
