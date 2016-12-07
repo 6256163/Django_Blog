@@ -1,8 +1,6 @@
 # coding=utf-8
 import datetime
-import os
-from time import sleep
-
+from dateutil import parser
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
@@ -134,6 +132,6 @@ class ReplyInReplyViewTestCase(TestCase):
         self.assertEqual(response.data['reply'], r.data['url'])
         self.assertEqual(response.data['reply_text'], self.reply_text)
         self.assertEqual(response.data['user'], self.user.username)
-        self.assertEqual(datetime.datetime.strptime(response.data['pub_data'],'%Y:%M:%S'), )
+        self.assertEqual(parser.parse(response.data['pub_date']).date(),datetime.datetime.now().date())
 
 
