@@ -45,7 +45,7 @@ class Reply(models.Model):
 @receiver(post_save, sender=Reply)
 def update_floor(sender, created, instance, **kwargs):
     if created:
-        instance.floor = Blog.objects.get(pk=instance.blog.id).reply_counter + 1
+        instance.floor = Blog.objects.get(pk=instance.blog.id).reply_counter + 2
         instance.save()
         instance.blog.reply_counter += 1
         instance.blog.latest_reply = instance.pub_date

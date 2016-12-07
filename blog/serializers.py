@@ -56,7 +56,7 @@ class ReplySerializer(serializers.HyperlinkedModelSerializer):
 
 class ReplyInReplySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
-    reply_id = serializers.IntegerField(source='reply.id')
+    reply_id = serializers.IntegerField(source='reply.id',read_only=True)
     head_img = serializers.ReadOnlyField(source='user.person.head_img.url')
 
     class Meta:

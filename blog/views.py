@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from . import forms
+from users.forms import RegisterForm
 from .models import Blog, Reply, ReplyInReply
 
 
@@ -57,7 +58,9 @@ class BlogViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=302, headers=headers)
+
+        #return 中的template_name没有实际意义。单元测试中需要给出返回的template。
+        return Response(serializer.data, status=302, headers=headers,template_name='blog/index.html',)
 
     # 重写list以适应分页需求
     def list(self, request, *args, **kwargs):
@@ -65,10 +68,14 @@ class BlogViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return Response({'blog': self.get_paginated_response(serializer.data).data},
+            return Response({'blog': self.get_paginated_response(serializer.data).data,
+                             'user': request.user,
+                             'form': RegisterForm},
                             template_name='blog/index.html')
         serializer = self.get_serializer(queryset, many=True)
-        return Response({'blog': serializer, 'user': request.user}, template_name='blog/index.html')
+        return Response({'blog': serializer,
+                         'user': request.user,
+                         'form': RegisterForm}, template_name='blog/index.html')
 
 
 class ReplyViewSet(viewsets.ModelViewSet):
