@@ -41,7 +41,8 @@ INSTALLED_APPS = (
     'users',
     'rest_framework',
     'django.contrib.humanize',
-    'media'
+    'media',
+    'selenium_test',
 )
 AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend','users.backends.MyBackend']
 
