@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/6256163/Django_Blog.svg?branch=master)](https://travis-ci.org/6256163/Django_Blog)
+[![Coverage Status](https://coveralls.io/repos/github/6256163/Django_Blog/badge.svg?branch=master)](https://coveralls.io/github/6256163/Django_Blog?branch=master)
 # Introduction
 ## A simple web project(Post Bar) by Django as practice.
 ### Achieved feature:
