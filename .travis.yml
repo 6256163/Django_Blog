@@ -13,6 +13,6 @@ install:
 # command to run tests
 script:
   - python manage.py migrate
-  - coverage run --source=blog manage.py test
+  - coverage run --source=blog manage.py test blog/
 after_success:
   - coveralls
