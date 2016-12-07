@@ -4,7 +4,13 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script src={% static "users/js/user.js" %}></script>
+
     <script>
+
+        window.onload = function () {
+            resize_iframe("#ifm_image","#register")
+        }
 
         function register_verication(dom, reg) {
             var result = true;
@@ -37,13 +43,13 @@
                 }
             }
             else {
-                if (verication_id == "username" || verication_id=="email") {
+                if (verication_id == "username" || verication_id == "email") {
                     $.ajax({
                         type: "POST",
                         url: "/user/register_verification/",
                         data: JSON.stringify({
                             "data": dom.val(),
-                            "type" : verication_id
+                            "type": verication_id
                         }),
                         contentType: "application/json",
                         dataType: "json",
@@ -115,9 +121,8 @@
                 }
             })
 
-            $("#x_register").click(function(){
-                $("#register").hide();
-                $("#shadow").eq(0).css("opacity", "0").css("zIndex", "-1");
+            $("#x_register").click(function () {
+                close_self_iframe("#ifm_image", "#shadow")
             })
 
         });
@@ -149,7 +154,7 @@
 <body style="">
 
 <div id="register"
-     style="background: white;position: fixed;margin:0 auto; width: 800px; border: 1px black solid; z-index: 1000;display: none;">
+     style="background: white;position: fixed;margin:0 auto; width: 800px; border: 1px black solid; z-index: 1000;">
 
     <div style="background: #dbf3ff; padding: 20px; border-bottom: #c3c3c3 1px solid;margin-bottom: 20px">
         <h2 style="margin: 0 0 0 220px ">注册贴吧帐号</h2>
@@ -159,7 +164,7 @@
 
 
     {% if error %}
-        <p><strong>{{ error }}</strong></p>
+        <p><strong id="register_error">{{ error }}</strong></p>
     {% endif %}
 
     <form id="register_form" action="/user/register/" method="post" onsubmit="return check()">
@@ -212,8 +217,8 @@
 
         </div>
     </form>
-<br/>
-<br/>
+    <br/>
+    <br/>
 </div>
 </body>
 </html>

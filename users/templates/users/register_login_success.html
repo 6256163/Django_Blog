@@ -1,15 +1,31 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv=refresh content="5;url={{ next }}">
-
     <title>登录成功</title>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script src={% static "users/js/user.js" %}></script>
     <script>
+        function refresh() {
+            $('#ifm_image', window.parent.document).eq(0).hide();
+            $('#ifm_image', window.parent.document)[0].src = " #";
+            $('#shadow', window.parent.document).eq(0).css("opacity", "0").css("zIndex", "-1");
+            parent.location.reload(true);
+        }
+        window.onload = function () {
+            resize_iframe("#ifm_image", "#meaage")
+
+            setTimeout(refresh, 5000)
+        }
     </script>
 </head>
-<body>
-登录成功，5秒后跳转回登陆前页面<br/>
-如果没有跳转，请<a href="{{ next }}">点击此处</a>
+<body style="background: white">
+<div id="meaage">
+    登录成功，5秒后跳转回登陆前页面<br/>
+    如果没有跳转，请<a href='' onclick="refresh();return false;">点击此处</a>
+
+</div>
 </body>
 </html>

@@ -6,13 +6,18 @@
     <title>Login</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script src={% static "users/js/user.js" %}></script>
 
     <script>
+        window.onload = function () {
+            resize_iframe("#ifm_image","#login")
+        }
+
 
         $(document).ready(function () {
             $("#a_user_register")[0].href = "/user/register/?next=" + window.location.pathname;
 
-            $("#x_login").click(function(){
+            $("#x_login").click(function () {
                 $("#login").hide();
                 $("#shadow").eq(0).css("opacity", "0").css("zIndex", "-1");
             })
@@ -29,11 +34,28 @@
                 $("#label_password")[0].style.backgroundPosition = "0-147px";
             });
 
-            $("#login_form")[0].action = "/user/login//?next=" + window.location.pathname;
             if ($("#logout")[0]) {
-                $("#logout")[0].href = "/user/logout/?next=" + window.location.pathname;
+                $("#logout")[0].href = "/user/logout/?next=" + (window.location.pathname ? window.location.pathname : "");
 
             }
+
+            $('#login_form').submit(function () {
+                if ($('#id_username').val() == "" | $('#id_password').val() == "") {
+                    return false
+                }
+            })
+
+            $("#x_login").click(function () {
+                close_self_iframe('#ifm_image', '#shadow')
+
+            })
+            {% if success %}
+                var success = '{{ success }}'
+                if (success == 'true') {
+                    close_self_iframe('#ifm_image', '#shadow')
+                    parent.location.reload(true)
+                }
+            {% endif %}
         })
 
 
@@ -49,16 +71,16 @@
 
 
 <div id="login" align="center"
-     style="background: white; position: fixed; width: 450px; border: 1px black solid; z-index: 1000;display: none;">
+     style="background: white; position: fixed; width: 450px; border: 1px black solid; z-index: 1000;">
 
     <div style="background: #dbf3ff; padding: 20px;border-bottom: #c3c3c3 1px solid">
         <h2 style="margin: 0; ">登录贴吧帐号</h2>
         <div id="x_login" style="position: absolute; right: 20px; top: 25px">&times;</div>
     </div>
 
-    <form id="login_form" action="" method="post">
+    <form id="login_form" action="/user/login/" method="post">
         <div style="width: 400px">
-            {% csrf_token %}
+
             <p style="border-radius:5px; overflow: hidden; padding: 10px; border: 1px rgb(169, 169, 169) solid; width: 90%; margin-bottom: 0">
                 <label for="id_username" id="label_username"
                        style="background-image:url({% static "users/pic/login.png" %}); background-position:0-68px ; width: 24px; height: 24px; display: block; overflow: hidden; float: left"></label>
@@ -74,6 +96,10 @@
                 <input id="id_password" name="password" type="password" placeholder="密码"
                        style="float: left; border: none;width: 300px; height: 24px; margin-left: 5px;outline:none;">
             </p>
+            {% csrf_token %}
+            {% if error %}
+                {{ error }}
+            {% endif %}
             <br/>
             <input type="submit" value="登录"
                    style="width: 95%; height: 30px; background-color: #21b7ff; color: white;font-weight: 700;font-size: 16px ;border: none"/>

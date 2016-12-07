@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 import re
 import urllib
 
+from django.core.serializers import json
+
 from blog.models import Blog, Reply
 from blog.serializers import BlogSerializer, ReplySerializer
-from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib import auth
 from rest_framework.permissions import AllowAny
@@ -114,24 +114,22 @@ def register(request):
                         Person.objects.create(user=user)
                         login_user = auth.authenticate(username=form.data['username'], password=form.data['password'])
                         auth.login(request, login_user)
-                        next = request.GET.get("next") if (request.GET.get("next") not in ["/user/login/",
-                                                                                           "/user/register/",
-                                                                                           "/user/register_login_success/", ]) else '/blog/'
                         return http.HttpResponseRedirect(
-                            "/user/register_login_success/?%s" % urllib.urlencode({'next': next}))
+                            "/user/register_login_success/")
                         # return render(request, 'users/register_login_success.html',{'info':'register'})
                     else:
-                        return render(request, 'blog/index.html', {'form': form})
+                        return http.HttpResponseRedirect(
+                            "/user/register_login_fail/" )
 
                 else:
-                    return render(request, 'blog/index.html', {'form': form, 'error': "邮箱格式不正确"})
+                    return render(request, 'users/register.html', {'form': form, 'error': "邮箱格式不正确"})
             else:
-                return render(request, 'blog/index.html', {'form': form, 'error': "密码不支持"})
+                return render(request, 'users/register.html', {'form': form, 'error': "密码不支持"})
         else:
-            return render(request, 'blog/index.html', {'form': form, 'error': "用户名不正确"})
+            return render(request, 'users/register.html', {'form': form, 'error': "用户名不正确"})
     else:
         form = forms.RegisterForm()
-        return render(request, 'blog/index.html', {"form": form})
+        return render(request, 'users/register.html', {"form": form})
 
 
 def login(request):
@@ -147,16 +145,16 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     auth.login(request, user)
-                    return http.HttpResponseRedirect("/blog/")
+                    return render(request, 'users/login.html', {'success': "true"})
                 else:
-                    return render(request, 'blog/index.html', {'error': "account disabled"})
+                    return render(request, 'users/login.html', {'error': "account disabled"})
             else:
-                return render(request, 'blog/index.html', {'error': "password error or account not existed"})
+                return render(request, 'users/login.html', {'error': "password error or account not existed"})
         else:
-            return render(request, 'blog/index.html', {'form': form})
+            return render(request, 'users/login.html', {'form': form})
     else:
         form = forms.LoginForm()
-        return render(request, 'blog/index.html', {'form': form})
+        return render(request, 'users/login.html', {'form': form})
 
 
 
@@ -176,7 +174,7 @@ def logout(request):
     :return: to blog index
     """
     auth.logout(request)
-    return http.HttpResponseRedirect(request.GET.get("next"))
+    return http.JsonResponse({"success":"true"},)
 
 
 def my_info(request):

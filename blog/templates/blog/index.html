@@ -119,6 +119,18 @@
                 $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
             })
 
+            $("#text_login").click(function () {
+                $("#ifm_image")[0].src = "/user/login/";
+                $("#ifm_image").eq(0).show().css("top", "100px");//.css("left", document.body.clientWidth / 2 - $("#ifm_image").width() / 2 + "px");
+                $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
+            })
+
+            $("#text_register").click(function () {
+                $("#ifm_image")[0].src = "/user/register/";
+                $("#ifm_image").eq(0).show().css("top", "100px");//.css("left", document.body.clientWidth / 2 - $("#ifm_image").width() / 2 + "px");
+                $("#shadow").eq(0).css("opacity", "0.4").css("zIndex", "999");
+            })
+
             window.onload = function () {
                 $("#blog_detail_outer").css("max-height", "document.body.clientHeight");
             }
