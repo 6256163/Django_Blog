@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'media',
     'selenium_test',
+    'redis',
 )
 AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend','users.backends.MyBackend']
 

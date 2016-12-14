@@ -1,6 +1,5 @@
 # coding=utf-8
 from __future__ import unicode_literals
-
 from blog.models import Blog, Reply, ReplyInReply
 from rest_framework import serializers
 

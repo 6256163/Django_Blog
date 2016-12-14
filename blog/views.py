@@ -3,17 +3,14 @@ from __future__ import unicode_literals
 
 from copy import copy
 
+import redis
+
 from blog.permissions import IsOwnerOrReadOnly
 from blog.serializers import BlogSerializer, ReplySerializer, ReplyInReplySerializer
-from django import http
-from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
 from rest_framework import permissions, viewsets, renderers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
-from . import forms
 from users.forms import RegisterForm
 from .models import Blog, Reply, ReplyInReply
 
@@ -30,6 +27,7 @@ class BlogViewSet(viewsets.ModelViewSet):
     serializer_class = BlogSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     renderer_classes = (renderers.TemplateHTMLRenderer, renderers.JSONRenderer,)
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, latest_reply_user=self.request.user)
@@ -40,6 +38,7 @@ class BlogViewSet(viewsets.ModelViewSet):
         serializer_blog = self.get_serializer(instance)
         replies_queryset = Reply.objects.filter(blog=instance)
         page = self.paginate_queryset(replies_queryset)
+        self.r.incr('visit:' + serializer_blog.data['url'] + ':totals')
         if page is not None:
             serializer_reply = ReplySerializer(page, context=self.get_serializer_context(), many=True)
             return Response(
@@ -57,8 +56,8 @@ class BlogViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        self.r.set('visit:' + serializer.data['url'] + ':totals',0)
         headers = self.get_success_headers(serializer.data)
-
         #return 中的template_name没有实际意义。单元测试中需要给出返回的template。
         return Response(serializer.data, status=302, headers=headers,template_name='blog/index.html',)
 
@@ -68,7 +67,12 @@ class BlogViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return Response({'blog': self.get_paginated_response(serializer.data).data,
+            blogs = self.get_paginated_response(serializer.data).data
+            click = list()
+            for b in blogs['results']:
+                click.append(self.r.get('visit:' + b['url'] + ':totals').strip() if self.r.get('visit:' + b['url'] + ':totals') else 0)
+            return Response({'blog': blogs,
+                             'click':click,
                              'user': request.user,
                              'form': RegisterForm},
                             template_name='blog/index.html')
