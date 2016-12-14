@@ -134,10 +134,10 @@
             window.onload = function () {
                 $("#blog_detail_outer").css("max-height", "document.body.clientHeight");
             }
-            show_blog_img(".blog_title p","");
-            for (var i=0;i<$(".blog_title p").length;i++){
+            show_blog_img(".blog_title p", "");
+            for (var i = 0; i < $(".blog_title p").length; i++) {
 
-                $(".blog_title p")[i].innerHTML=$(".blog_title p")[i].innerText;
+                $(".blog_title p")[i].innerHTML = $(".blog_title p")[i].innerText;
             }
 
 
@@ -179,12 +179,18 @@
                     style="border-top:1px solid black">
                     <div class="hidden">
                         <div class="reply_bubble" align="center">
-                            <span style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover;">{{ b.reply_counter }}</span>
+                            <span class="text" style="background:url({% static "blog/pic/reply_bubble.png" %}); background-size:cover;word-break:break-all">
+                                {% for c in click %}
+                                    {% if forloop.counter == forloop.parentloop.counter %}
+                                        {{ c }}
+                                    {% endif %}
+                                {% endfor %}
+                                /{{ b.reply_counter }}</span>
                         </div>
                         <div class="blog_outer hidden">
                             <div class="hidden blog_info">
                                 <div class="text blog_title">
-                                    <a id="{{ b.id }}" href="{{ b.url }}" title="{{ b.blog_title }}"
+                                    <a id="{{ b.id }}" href="{{ b.url }}" title="{{ b.blog_title }}" style="padding-left: 5px"
                                        onclick="show_blog_detail(this);return false;">{{ b.blog_title }}</a>
 
                                 </div>
@@ -206,7 +212,7 @@
 
                                 <div class="blog_title" style="font-size:12px">
                                     <div style="width: 95%;">
-                                        <p class="text">{{ b.blog_text }}</p>
+                                        <p class="text" style="padding-left: 5px">{{ b.blog_text }}</p>
                                     </div>
                                 </div>
 

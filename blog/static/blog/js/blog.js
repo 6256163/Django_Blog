@@ -6,10 +6,25 @@
 String.prototype.replaceAll = function (s1, s2) {
     return this.replace(new RegExp(s1, "gm"), s2);
 };
+String.prototype.trim = function () {
+    return this.replace(/(^\s*)|(\s*$)/g, "");
+}
+String.prototype.ltrim = function () {
+    return this.replace(/(^\s*)/g, "");
+}
+String.prototype.rtrim = function () {
+    return this.replace(/(\s*$)/g, "");
+}
+String.prototype.mtrim = function () {
+    return this.replace(/(\s*)/g, "");
+}
 
 $(document).ready(function () {
     var current_blog_url = "";
-
+    for (var i = 0; i < $(".reply_bubble span").length; i++) {
+        $(".reply_bubble span")[i].innerText=$(".reply_bubble span")[i].innerText.mtrim();
+        $(".reply_bubble span")[i].title = $(".reply_bubble span")[i].innerText
+    }
     // blog list 翻页
     $("form#blog_list_page_turn").submit(function () {
         var validate_data = $("form#blog_list_page_turn").find("input").val();
@@ -110,7 +125,7 @@ $.ajaxSetup({
         }
     }
 });
-function load_blog_title(response_data){
+function load_blog_title(response_data) {
     var $blog_title = $('<div class="blog_detail_title" style="display: none;">' +
         '<strong> <p id="blog_title">' + response_data.blog.blog_title + '</p> </strong> </div>');
 
@@ -183,19 +198,19 @@ function load_replies_detail_pagination(response_data) {
 
     if (response_data.replies.previous) {
         $page_previous.append($('<a onclick="show_blog_detail(this);return false;"></a>').attr("href", response_data.replies.previous).text("上一页"))
-        if(!response_data.replies.next){
+        if (!response_data.replies.next) {
             $turn_page_input.val(Math.ceil(response_data.replies.count / 10))
         }
-        else{
+        else {
             $turn_page_input.val(parseInt(response_data.replies.next.split("=")[1]) - 1)
         }
     }
     if (response_data.replies.next) {
         $page_next.append($('<a onclick="show_blog_detail(this);return false;"></a>').attr("href", response_data.replies.next).text("下一页"))
-        if(!response_data.replies.previous){
+        if (!response_data.replies.previous) {
             $turn_page_input.val(1)
         }
-        else{
+        else {
             $turn_page_input.val(parseInt(response_data.replies.previous.split("=")[1]) + 1)
         }
     }
